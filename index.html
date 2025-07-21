@@ -186,7 +186,7 @@ resource "aws_security_group" "sg" { name = "open" ingress { from_port=0 to_port
     document.getElementById('btnCheck').onclick = () =>
       callLambda(urlCheck, document.getElementById('checkInput'), 'checkOutput');
     document.getElementById('imageCheck').onclick = () =>
-      callLambda(urlCheck, document.getElementById('checkInput'), 'checkOutput');
+      callLambda(imgInput, document.getElementById('genInput'), 'genOutput');
   </script>
 </body>
 </html>
