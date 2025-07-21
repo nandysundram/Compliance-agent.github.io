@@ -119,6 +119,7 @@ resource "aws_security_group" "sg" { name = "open" ingress { from_port=0 to_port
   </div>
   <!---Section 3: Image input terragen --->
 <!-- Section 3: Image input Terraform Generator -->
+<!-- Section 3: Image input Terraform Generator -->
 <div class="section" id="sectionImageGen">
   <h2>🖼️ Image to Terraform Generator</h2>
   <label for="imageInputFile">Upload Architecture Diagram:</label>
@@ -237,9 +238,9 @@ resource "aws_security_group" "sg" { name = "open" ingress { from_port=0 to_port
 
   document.getElementById('btnCheck').onclick = () =>
     callLambda(urlCheck, document.getElementById('checkInput'), 'checkOutput');
-
   document.getElementById('btnImageGen').onclick = () =>
-    callImageToTerraform(urlImageGen, 'imageInputFile', 'imageGenOutput');
+     callImageToTerraform(urlImageGen, 'imageInputFile', 'imageGenOutput');
+
 </script>
 
 </body>
