@@ -120,13 +120,13 @@ resource "aws_security_group" "sg" { name = "open" ingress { from_port=0 to_port
   <!---Section 3: Image input terragen --->
   <div class="section" id="sectionCheck">
     <h2>Image To Terraform Generator </h2>
-    <label for="checkInput"> Image Input </label>
-    <textarea id="checkInput"> Your Archtecture here
+    <label for="checkImagein"> Image Input </label>
+    <textarea id="checkImageOut"> create terraform script for the shared image
 </textarea>
     <input type="file" accept="image/*" id="imageCheckInput" />
     <br/>
     <button id="imageCheck">Generate Terraform Code</button>
-    <div id="checkOutput" class="output"></div>
+    <div id="checkImageOut" class="output"></div>
   </div>
   <script>
     const urlGen = "https://gcvmn7p7bchsashpcnzfbfvxbq0xxkju.lambda-url.us-east-1.on.aws/";
@@ -185,8 +185,9 @@ resource "aws_security_group" "sg" { name = "open" ingress { from_port=0 to_port
 
     document.getElementById('btnCheck').onclick = () =>
       callLambda(urlCheck, document.getElementById('checkInput'), 'checkOutput');
+    
     document.getElementById('imageCheck').onclick = () =>
-      callLambda(imgInput, document.getElementById('genInput'), 'genOutput');
+      callLambda(imgInput, document.getElementById('checkImagein'), 'checkImageOut');
   </script>
 </body>
 </html>
