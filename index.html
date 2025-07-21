@@ -3,148 +3,106 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BCT Terra Tool</title>
+  <title>Terraform Tools UI</title>
   <style>
-    :root {
-      --primary: #007BFF;
-      --secondary: #ffffff;
-      --bg-dark: #0d1b2a;
-      --bg-light: #1b263b;
-      --border: #4a90e2;
-      --shadow: rgba(0, 0, 0, 0.2);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--bg-dark);
-      color: var(--secondary);
-      padding: 30px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
+      background-color: #f0f4f8;
+      color: #2c3e50;
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
     }
-
     h1 {
-      font-size: 3rem;
-      margin-bottom: 20px;
-      color: var(--primary);
-      text-shadow: 1px 1px 8px var(--shadow);
+      text-align: center;
+      color: #1a73e8;
     }
-
-    h2 {
-      color: var(--secondary);
-      border-bottom: 2px solid var(--primary);
-      padding-bottom: 5px;
-      margin-bottom: 10px;
-    }
-
     .section {
-      width: 100%;
-      max-width: 800px;
-      background: var(--bg-light);
-      border: 1px solid var(--border);
+      background: #ffffff;
       border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
       padding: 20px;
       margin-bottom: 30px;
-      box-shadow: 0 4px 15px var(--shadow);
     }
-
+    h2 {
+      color: #1a73e8;
+      margin-top: 0;
+    }
     label {
       display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
-      color: var(--secondary);
+      font-weight: 600;
+      margin-bottom: 6px;
     }
-
     textarea {
       width: 100%;
       height: 140px;
+      font-family: 'Courier New', Courier, monospace;
       padding: 10px;
-      font-family: monospace;
-      background: #eaf1fb;
-      color: #000;
-      border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 12px;
+      resize: vertical;
     }
-
     button {
-      background: var(--primary);
+      background-color: #1a73e8;
       color: white;
       border: none;
+      border-radius: 6px;
       padding: 10px 16px;
-      border-radius: 6px;
-      margin-top: 10px;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: background-color 0.2s ease-in-out;
     }
-
     button:hover {
-      background: #0056b3;
+      background-color: #155ab6;
     }
-
     .output {
-      margin-top: 15px;
+      background-color: #f9fbff;
+      border-left: 4px solid #1a73e8;
       padding: 12px;
-      background: #f1f9ff;
-      color: #000;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      margin-top: 15px;
+      min-height: 30px;
       white-space: pre-wrap;
-      min-height: 40px;
+      border-radius: 6px;
     }
-
     .loading {
       opacity: 0.8;
     }
-
     .error {
-      color: red;
+      color: #d32f2f;
     }
-
     .spinner {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid var(--primary);
+      border: 4px solid #e3e3e3;
+      border-top: 4px solid #1a73e8;
       border-radius: 50%;
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       animation: spin 1s linear infinite;
       margin: 10px auto;
     }
-
+    input[type="file"] {
+      margin-top: 8px;
+    }
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 2rem;
-      }
-
-      textarea {
-        height: 120px;
-      }
-    }
   </style>
 </head>
 <body>
-  <h1>🚀 BCT Terra Tool</h1>
+  <h1>Terraform Tools UI</h1>
 
+  <!-- Section 1: Terraform Generator -->
   <div class="section" id="sectionGen">
     <h2>🛠️ Generate Terraform</h2>
     <label for="genInput">Description Input:</label>
     <textarea id="genInput">I need a VPC with public/private subnets, an EC2 web server in the public subnet, an RDS PostgreSQL in the private subnet, and an S3 bucket for static assets. Configure Security Groups for HTTP (80) & HTTPS (443) to EC2 and port 5432 from EC2 to PostgreSQL.</textarea>
+    <input type="file" accept="image/*" id="imageGenInput" />
+    <br/>
     <button id="btnGen">Run Generate</button>
     <div id="genOutput" class="output"></div>
   </div>
 
+  <!-- Section 2: Terraform Compliance Checker -->
   <div class="section" id="sectionCheck">
     <h2>🔍 Check Compliance</h2>
     <label for="checkInput">Terraform HCL Input:</label>
@@ -154,18 +112,31 @@ resource "aws_s3_bucket" "b" { bucket = "x" acl = "public-read" }
 
 resource "aws_security_group" "sg" { name = "open" ingress { from_port=0 to_port=0 protocol="-1" cidr_blocks=["0.0.0.0/0"] } }
 </textarea>
+    <input type="file" accept="image/*" id="imageCheckInput" />
+    <br/>
     <button id="btnCheck">Run Compliance</button>
     <div id="checkOutput" class="output"></div>
   </div>
-
+  <!---Section 3: Image input terragen --->
+  <div class="section" id="sectionCheck">
+    <h2>Image To Terraform Generator </h2>
+    <label for="checkInput"> Image Input </label>
+    <textarea id="checkInput"> Your Archtecture here
+</textarea>
+    <input type="file" accept="image/*" id="imageCheckInput" />
+    <br/>
+    <button id="imageCheck">Generate Terraform Code</button>
+    <div id="checkOutput" class="output"></div>
+  </div>
   <script>
     const urlGen = "https://gcvmn7p7bchsashpcnzfbfvxbq0xxkju.lambda-url.us-east-1.on.aws/";
     const urlCheck = "https://ul447fmqnaneohg3su272y4m540uethx.lambda-url.us-east-1.on.aws/";
+    const imgInput = "https://pkjmc4nyu2cybzb5rwb54rrghe0eioit.lambda-url.us-east-1.on.aws/";
 
     async function callLambda(url, rawEl, outEl) {
       const raw = rawEl.value;
       const out = document.getElementById(outEl);
-      out.innerHTML = '<div class="spinner"></div>';
+      out.innerHTML = '<div class="spinner"></div>'; // show spinner
       out.classList.remove('error');
       out.classList.add('loading');
 
@@ -213,6 +184,8 @@ resource "aws_security_group" "sg" { name = "open" ingress { from_port=0 to_port
       callLambda(urlGen, document.getElementById('genInput'), 'genOutput');
 
     document.getElementById('btnCheck').onclick = () =>
+      callLambda(urlCheck, document.getElementById('checkInput'), 'checkOutput');
+    document.getElementById('imageCheck').onclick = () =>
       callLambda(urlCheck, document.getElementById('checkInput'), 'checkOutput');
   </script>
 </body>
