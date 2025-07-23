@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Terraform Tools UI</title>
   <style>
@@ -25,7 +25,25 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       padding: 20px;
       margin-bottom: 30px;
+      position: relative;
     }
+
+    /* Glow for dropzone */
+    .section.drop-zone {
+      animation: pulseGlow 2s infinite;
+      border: 2px dashed transparent;
+      transition: border 0.3s;
+    }
+    .section.drop-zone.dragover {
+      border-color: #1a73e8;
+      animation: none;
+    }
+    @keyframes pulseGlow {
+      0%   { box-shadow: 0 0 0 0 rgba(26, 115, 232, 0.4); }
+      70%  { box-shadow: 0 0 0 10px rgba(26, 115, 232, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(26, 115, 232, 0); }
+    }
+
     h2 {
       color: #1a73e8;
       margin-top: 0;
@@ -86,7 +104,22 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Styled file input */
+    /* Hidden file inputs for first two sections */
+    #genSection input[type="file"],
+    #checkSection input[type="file"] {
+      display: none;
+    }
+
+    /* Image preview */
+    .preview {
+      max-width: 100%;
+      max-height: 300px;
+      margin-top: 10px;
+      border-radius: 8px;
+      display: none;
+    }
+
+    /* File input for Image-to-Terraform section (visible) */
     .file-input-wrapper {
       position: relative;
       overflow: hidden;
@@ -94,15 +127,14 @@
       margin-top: 8px;
       margin-bottom: 10px;
     }
-
     .file-input-wrapper input[type="file"] {
       font-size: 100px;
       position: absolute;
       left: 0;
       top: 0;
       opacity: 0;
+      cursor: pointer;
     }
-
     .file-btn {
       background-color: #1a73e8;
       color: white;
@@ -112,7 +144,6 @@
       display: inline-block;
       font-weight: 500;
     }
-
     .file-btn:hover {
       background-color: #155ab6;
     }
@@ -122,61 +153,79 @@
   <h1>Terraform Tools UI</h1>
 
   <!-- Section 1: Terraform Generator -->
-  <div class="section">
+  <div class="section drop-zone" id="genSection">
     <h2>🛠️ Generate Terraform</h2>
     <label for="genInput">Description Input:</label>
-    <textarea id="genInput">I need a VPC with public/private subnets, an EC2 web server in the public subnet, an RDS PostgreSQL in the private subnet, and an S3 bucket for static assets...</textarea>
-    <label>Upload Image:</label>
-    <div class="file-input-wrapper">
-      <span class="file-btn">Choose Image</span>
-      <input type="file" accept="image/*" id="imageGenInput" />
-    </div>
-    <br/>
+    <textarea id="genInput">Enter your input</textarea>
     <button id="btnGen">Run Generate</button>
     <div id="genOutput" class="output"></div>
+    <img id="genPreview" class="preview" alt="Uploaded preview"/>
   </div>
 
   <!-- Section 2: Terraform Compliance Checker -->
-  <div class="section">
+  <div class="section drop-zone" id="checkSection">
     <h2>🔍 Check Compliance</h2>
     <label for="checkInput">Terraform HCL Input:</label>
-    <textarea id="checkInput">provider "aws" { region = "us-west-2" }
-
-resource "aws_s3_bucket" "b" { bucket = "x" acl = "public-read" }
-
-resource "aws_security_group" "sg" { name = "open" ingress { from_port=0 to_port=0 protocol="-1" cidr_blocks=["0.0.0.0/0"] } }
+    <textarea id="checkInput"> Enter your input
 </textarea>
-    <label>Upload Image:</label>
-    <div class="file-input-wrapper">
-      <span class="file-btn">Choose Image</span>
-      <input type="file" accept="image/*" id="imageCheckInput" />
-    </div>
-    <br/>
     <button id="btnCheck">Run Compliance</button>
     <div id="checkOutput" class="output"></div>
+    <img id="checkPreview" class="preview" alt="Uploaded preview"/>
   </div>
 
   <!-- Section 3: Image to Terraform -->
-  <div class="section">
+  <div class="section drop-zone" id="imageSection">
     <h2>🖼️ Image to Terraform Generator</h2>
     <label for="checkImagein">Image Context Input:</label>
-    <textarea id="checkImagein">create terraform script for the shared image</textarea>
+    <textarea id="checkImagein"></textarea>
+
+    <!-- Visible file input for this section -->
     <label>Upload Architecture Image:</label>
     <div class="file-input-wrapper">
       <span class="file-btn">Choose Image</span>
       <input type="file" accept="image/*" id="imageInputOnly" />
     </div>
-    <br/>
+    
     <button id="imageCheck">Generate Terraform Code</button>
     <div id="checkImageOut" class="output"></div>
+    <img id="imagePreview" class="preview" alt="Uploaded preview"/>
   </div>
 
   <script>
-    const urlGen = "https://2jpdo3bst2rvpzymhebdgvgnma0msplp.lambda-url.ap-southeast-1.on.aws/";
+    const urlGen   = "https://2jpdo3bst2rvpzymhebdgvgnma0msplp.lambda-url.ap-southeast-1.on.aws/";
     const urlCheck = "https://kfjskb3ttrvcclvb7rw4t3d2na0aebcl.lambda-url.ap-southeast-1.on.aws/";
     const imgInput = "https://horyvmwuwwf4zfunvy7a3kggiu0mmvvn.lambda-url.ap-southeast-1.on.aws/";
 
-    async function callLambda(url, rawEl, outEl) {
+    /* ---------- drag-and-drop helpers ---------- */
+    function enableDropZone(section, preview) {
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt =>
+        section.addEventListener(evt, e => e.preventDefault())
+      );
+      ['dragenter', 'dragover'].forEach(evt =>
+        section.addEventListener(evt, () => section.classList.add('dragover'))
+      );
+      ['dragleave', 'drop'].forEach(evt =>
+        section.addEventListener(evt, () => section.classList.remove('dragover'))
+      );
+      section.addEventListener('drop', e => {
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+          renderPreview(file, preview);
+        }
+      });
+    }
+
+    function renderPreview(file, imgEl) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        imgEl.src = e.target.result;
+        imgEl.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    /* ---------- API caller ---------- */
+    async function callLambda(url, rawEl, outEl, imgEl) {
       const raw = rawEl.value;
       const out = document.getElementById(outEl);
       out.innerHTML = '<div class="spinner"></div>';
@@ -202,7 +251,6 @@ resource "aws_security_group" "sg" { name = "open" ingress { from_port=0 to_port
 
         const text = await res.text();
         let parsed = null;
-
         try {
           const obj = JSON.parse(text);
           if (obj && obj.statusCode && obj.body) parsed = obj.body;
@@ -210,9 +258,7 @@ resource "aws_security_group" "sg" { name = "open" ingress { from_port=0 to_port
 
         out.textContent = parsed ?? text;
 
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}: ${text}`);
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${text}`);
       } catch (err) {
         out.classList.add('error');
         out.textContent = 'Error: ' + err.message;
@@ -221,14 +267,26 @@ resource "aws_security_group" "sg" { name = "open" ingress { from_port=0 to_port
       }
     }
 
+    /* ---------- wire buttons ---------- */
     document.getElementById('btnGen').onclick = () =>
-      callLambda(urlGen, document.getElementById('genInput'), 'genOutput');
+      callLambda(urlGen, document.getElementById('genInput'), 'genOutput', 'genPreview');
 
     document.getElementById('btnCheck').onclick = () =>
-      callLambda(urlCheck, document.getElementById('checkInput'), 'checkOutput');
+      callLambda(urlCheck, document.getElementById('checkInput'), 'checkOutput', 'checkPreview');
 
     document.getElementById('imageCheck').onclick = () =>
-      callLambda(imgInput, document.getElementById('checkImagein'), 'checkImageOut');
+      callLambda(imgInput, document.getElementById('checkImagein'), 'checkImageOut', 'imagePreview');
+
+    /* ---------- attach drop zones ---------- */
+    enableDropZone(document.getElementById('genSection'),    document.getElementById('genPreview'));
+    enableDropZone(document.getElementById('checkSection'),  document.getElementById('checkPreview'));
+    enableDropZone(document.getElementById('imageSection'),  document.getElementById('imagePreview'));
+
+    /* ---------- manual file select for Image-to-Terraform ---------- */
+    document.getElementById('imageInputOnly').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (file) renderPreview(file, document.getElementById('imagePreview'));
+    });
   </script>
 </body>
 </html>
