@@ -190,11 +190,23 @@
     <div id="checkImageOut" class="output"></div>
     <img id="imagePreview" class="preview" alt="Uploaded preview"/>
   </div>
+   <!-- Section 4: Extra Tools -->
+  <div class="section" id="extraSection">
+    <h2>⚙️ Additional Tools</h2>
+    <div style="text-align:center; margin-top: 20px;">
+      <button id="btnFinops">💰 FinOps Tool</button>
+      <button id="btnWellArch">🏗️ Well-Architected Tool</button>
+    </div>
+    <div id="finopsOutput" class="output"></div>
+    <div id="wellArchOutput" class="output"></div>
+  </div>
 
   <script>
     const urlGen   = "https://2jpdo3bst2rvpzymhebdgvgnma0msplp.lambda-url.ap-southeast-1.on.aws/";
     const urlCheck = "https://kfjskb3ttrvcclvb7rw4t3d2na0aebcl.lambda-url.ap-southeast-1.on.aws/";
     const imgInput = "https://horyvmwuwwf4zfunvy7a3kggiu0mmvvn.lambda-url.ap-southeast-1.on.aws/";
+    const urlFinops   = "https://<your-finops-lambda-url>";
+    const urlWellArch = "https://<your-wellarch-lambda-url>";
 
     /* ---------- drag-and-drop helpers ---------- */
     function enableDropZone(section, preview) {
@@ -276,6 +288,12 @@
 
     document.getElementById('imageCheck').onclick = () =>
       callLambda(imgInput, document.getElementById('checkImagein'), 'checkImageOut', 'imagePreview');
+    
+    document.getElementById('btnFinops').onclick = () =>
+      callLambda(urlFinops, document.getElementById('genInput'), 'finopsOutput', 'genPreview');
+
+    document.getElementById('btnWellArch').onclick = () =>
+      callLambda(urlWellArch, document.getElementById('genInput'), 'wellArchOutput', 'genPreview');
 
     /* ---------- attach drop zones ---------- */
     enableDropZone(document.getElementById('genSection'),    document.getElementById('genPreview'));
