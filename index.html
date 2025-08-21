@@ -199,12 +199,19 @@
   </div>
    <!-- Section 4: Extra Tools -->
   <div class="section" id="extraSection">
-    <h2>⚙️ Additional Tools</h2>
+    <h2>⚙️ Finops Tools</h2>
     <div style="text-align:center; margin-top: 20px;">
       <button id="btnFinops">💰 FinOps Tool</button>
-      <button id="btnWellArch">🏗️ Well-Architected Tool</button>
     </div>
     <div id="finopsOutput" class="output"></div>
+    <div id="wellArchOutput" class="output"></div>
+  </div>
+  <!-- Section 5: Extra Tools -->
+  <div class="section" id="wellarchSection">
+    <h2>⚙️ Well-Arhitected Tools</h2>
+    <div style="text-align:center; margin-top: 20px;">
+      <button id="btnWellArch">🏗️ Well-Architected Tool</button>
+    </div>
     <div id="wellArchOutput" class="output"></div>
   </div>
 
@@ -306,6 +313,9 @@
     enableDropZone(document.getElementById('genSection'),    document.getElementById('genPreview'));
     enableDropZone(document.getElementById('checkSection'),  document.getElementById('checkPreview'));
     enableDropZone(document.getElementById('imageSection'),  document.getElementById('imagePreview'));
+    enableDropZone(document.getElementById('extraSection'),    document.getElementById('extraPreview'));
+    enableDropZone(document.getElementById('wellarchSection'),  document.getElementById('wellarchPreview'));
+
 
     /* ---------- manual file select for Image-to-Terraform ---------- */
     document.getElementById('imageInputOnly').addEventListener('change', e => {
