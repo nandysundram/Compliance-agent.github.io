@@ -63,18 +63,25 @@
       margin-bottom: 12px;
       resize: vertical;
     }
-    button {
-      background-color: #1a73e8;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 10px 16px;
-      cursor: pointer;
-      transition: background-color 0.2s ease-in-out;
+    button,
+  .file-btn {
+     background-color: #1a73e8;
+     color: white;
+     border: none;
+     border-radius: 6px;
+     padding: 10px 16px;
+     cursor: pointer;
+     transition: background-color 0.2s ease-in-out;
+     font-weight: 500;
+     width: 180px;   /* 🔧 fixed size for all buttons */
+     text-align: center;
+     display: inline-block;
     }
-    button:hover {
-      background-color: #155ab6;
+    button:hover,
+  .file-btn:hover {
+    background-color: #155ab6;
     }
+
     .output {
       background-color: #f9fbff;
       border-left: 4px solid #1a73e8;
