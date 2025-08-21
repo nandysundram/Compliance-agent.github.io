@@ -1,199 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Terraform Tools UI</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compliance Dashboard</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: url('https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
-      background-size: cover;
-      color: #2c3e50;
-      max-width: 960px;
-      margin: auto;
+      font-family: Arial, sans-serif;
+      margin: 0;
       padding: 20px;
+      background-color: #f4f6f9;
+      color: #333;
     }
+
     h1 {
       text-align: center;
-      color: #ffffff;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+      color: #222;
     }
+
     .section {
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      background: white;
       padding: 20px;
-      margin-bottom: 30px;
-      position: relative;
+      margin: 20px auto;
+      border-radius: 8px;
+      max-width: 900px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
-    /* Glow for dropzone */
-    .section.drop-zone {
-      animation: pulseGlow 2s infinite;
-      border: 2px dashed transparent;
-      transition: border 0.3s;
-    }
-    .section.drop-zone.dragover {
-      border-color: #1a73e8;
-      animation: none;
-    }
-    @keyframes pulseGlow {
-      0%   { box-shadow: 0 0 0 0 rgba(26, 115, 232, 0.4); }
-      70%  { box-shadow: 0 0 0 10px rgba(26, 115, 232, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(26, 115, 232, 0); }
-    }
-
-    h2 {
-      color: #1a73e8;
+    .section h2 {
       margin-top: 0;
+      color: #444;
     }
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
+
     textarea {
       width: 100%;
-      height: 140px;
-      font-family: 'Courier New', Courier, monospace;
+      height: 100px;
+      margin: 10px 0;
       padding: 10px;
-      border-radius: 8px;
       border: 1px solid #ccc;
-      margin-bottom: 12px;
-      resize: vertical;
+      border-radius: 6px;
+      font-size: 14px;
     }
+
+    .output {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      font-size: 14px;
+    }
+
     button {
       background-color: #1a73e8;
       color: white;
       border: none;
       border-radius: 6px;
-      padding: 10px 16px;
+      padding: 12px 20px;
       cursor: pointer;
       transition: background-color 0.2s ease-in-out;
+      font-weight: 500;
+      min-width: 180px;       /* consistent width */
+      text-align: center;
     }
+
     button:hover {
       background-color: #155ab6;
     }
-    .output {
-      background-color: #f9fbff;
-      border-left: 4px solid #1a73e8;
-      padding: 12px;
+
+    /* flexbox container to align buttons */
+    .button-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;   /* wrap on small screens */
+      gap: 10px;         /* consistent gap */
       margin-top: 15px;
-      min-height: 30px;
-      white-space: pre-wrap;
-      border-radius: 6px;
-    }
-    .loading {
-      opacity: 0.8;
-    }
-    .error {
-      color: #d32f2f;
-    }
-    .spinner {
-      border: 4px solid #e3e3e3;
-      border-top: 4px solid #1a73e8;
-      border-radius: 50%;
-      width: 28px;
-      height: 28px;
-      animation: spin 1s linear infinite;
-      margin: 10px auto;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
     }
 
-    /* Hidden file inputs for first two sections */
-    #genSection input[type="file"],
-    #checkSection input[type="file"] {
-      display: none;
-    }
-
-    /* Image preview */
     .preview {
-      max-width: 100%;
-      max-height: 300px;
       margin-top: 10px;
-      border-radius: 8px;
-      display: none;
-    }
-
-    /* File input for Image-to-Terraform section (visible) */
-    .file-input-wrapper {
-      position: relative;
-      overflow: hidden;
-      display: inline-block;
-      margin-top: 8px;
-      margin-bottom: 10px;
-    }
-    .file-input-wrapper input[type="file"] {
-      font-size: 100px;
-      position: absolute;
-      left: 0;
-      top: 0;
-      opacity: 0;
-      cursor: pointer;
-    }
-    .file-btn {
-      background-color: #1a73e8;
-      color: white;
-      padding: 10px 16px;
+      padding: 10px;
+      background: #eef6ff;
+      border: 1px dashed #1a73e8;
       border-radius: 6px;
-      cursor: pointer;
-      display: inline-block;
-      font-weight: 500;
-    }
-    .file-btn:hover {
-      background-color: #155ab6;
+      font-size: 13px;
+      color: #1a73e8;
     }
   </style>
 </head>
 <body>
-  <h1>Terraform Tools UI</h1>
+  <h1>🚀 Compliance Dashboard</h1>
 
-  <!-- Section 1: Terraform Generator -->
-  <div class="section drop-zone" id="genSection">
-    <h2>🛠️ Generate Terraform</h2>
-    <label for="genInput">Description Input:</label>
-    <textarea id="genInput">Enter your input</textarea>
-    <button id="btnGen">Run Generate</button>
-    <div id="genOutput" class="output"></div>
-    <img id="genPreview" class="preview" alt="Uploaded preview"/>
-  </div>
-
-  <!-- Section 2: Terraform Compliance Checker -->
-  <div class="section drop-zone" id="checkSection">
-    <h2>🔍 Check Compliance</h2>
-    <label for="checkInput">Terraform HCL Input:</label>
-    <textarea id="checkInput"> Enter your input
-</textarea>
-    <button id="btnCheck">Run Compliance</button>
-    <div id="checkOutput" class="output"></div>
-    <img id="checkPreview" class="preview" alt="Uploaded preview"/>
-  </div>
-
-  <!-- Section 3: Image to Terraform -->
-  <div class="section drop-zone" id="imageSection">
-    <h2>🖼️ Image to Terraform Generator</h2>
-    <label for="checkImagein">Image Context Input:</label>
-    <textarea id="checkImagein"></textarea>
-
-    <!-- Visible file input for this section -->
-    <label>Upload Architecture Image:</label>
-    <div class="file-input-wrapper">
-      <span class="file-btn">Choose Image</span>
-      <input type="file" accept="image/*" id="imageInputOnly" />
+  <!-- Section 1 -->
+  <div class="section" id="generateSection">
+    <h2>🛠️ Generate</h2>
+    <textarea id="genInput" placeholder="Enter text for Generate..."></textarea>
+    <div class="button-row">
+      <button id="btnGen">Run Generate</button>
     </div>
-    
-    <button id="imageCheck">Generate Terraform Code</button>
-    <div id="checkImageOut" class="output"></div>
-    <img id="imagePreview" class="preview" alt="Uploaded preview"/>
+    <div id="genOutput" class="output"></div>
+    <div id="genPreview" class="preview"></div>
   </div>
-   <!-- Section 4: Extra Tools -->
+
+  <!-- Section 2 -->
+  <div class="section" id="complianceSection">
+    <h2>🔍 Compliance Check</h2>
+    <textarea id="checkInput" placeholder="Enter text for Compliance..."></textarea>
+    <div class="button-row">
+      <button id="btnCheck">Run Compliance</button>
+    </div>
+    <div id="checkOutput" class="output"></div>
+    <div id="checkPreview" class="preview"></div>
+  </div>
+
+  <!-- Section 3 -->
+  <div class="section" id="imageSection">
+    <h2>🖼️ Image Input</h2>
+    <textarea id="checkImagein" placeholder="Enter text for Image Input..."></textarea>
+    <div class="button-row">
+      <button id="imageCheck">Generate Terraform Code</button>
+    </div>
+    <div id="checkImageOut" class="output"></div>
+    <div id="imagePreview" class="preview"></div>
+  </div>
+
+  <!-- Section 4: Extra Tools -->
   <div class="section" id="extraSection">
     <h2>⚙️ Additional Tools</h2>
-    <div style="text-align:center; margin-top: 20px;">
+    <div class="button-row">
       <button id="btnFinops">💰 FinOps Tool</button>
       <button id="btnWellArch">🏗️ Well-Architected Tool</button>
     </div>
@@ -205,81 +140,33 @@
     const urlGen   = "https://2jpdo3bst2rvpzymhebdgvgnma0msplp.lambda-url.ap-southeast-1.on.aws/";
     const urlCheck = "https://kfjskb3ttrvcclvb7rw4t3d2na0aebcl.lambda-url.ap-southeast-1.on.aws/";
     const imgInput = "https://horyvmwuwwf4zfunvy7a3kggiu0mmvvn.lambda-url.ap-southeast-1.on.aws/";
+
+    // placeholder URLs for new tools
     const urlFinops   = "https://<your-finops-lambda-url>";
     const urlWellArch = "https://<your-wellarch-lambda-url>";
 
-    /* ---------- drag-and-drop helpers ---------- */
-    function enableDropZone(section, preview) {
-      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt =>
-        section.addEventListener(evt, e => e.preventDefault())
-      );
-      ['dragenter', 'dragover'].forEach(evt =>
-        section.addEventListener(evt, () => section.classList.add('dragover'))
-      );
-      ['dragleave', 'drop'].forEach(evt =>
-        section.addEventListener(evt, () => section.classList.remove('dragover'))
-      );
-      section.addEventListener('drop', e => {
-        const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) {
-          renderPreview(file, preview);
-        }
-      });
-    }
-
-    function renderPreview(file, imgEl) {
-      const reader = new FileReader();
-      reader.onload = e => {
-        imgEl.src = e.target.result;
-        imgEl.style.display = 'block';
-      };
-      reader.readAsDataURL(file);
-    }
-
-    /* ---------- API caller ---------- */
-    async function callLambda(url, rawEl, outEl, imgEl) {
-      const raw = rawEl.value;
-      const out = document.getElementById(outEl);
-      out.innerHTML = '<div class="spinner"></div>';
-      out.classList.remove('error');
-      out.classList.add('loading');
-
-      const payload = {
-        version: "2.0",
-        routeKey: "POST /",
-        rawPath: "/",
-        rawQueryString: "",
-        headers: { "content-type": "text/plain" },
-        body: raw,
-        isBase64Encoded: false
-      };
+    async function callLambda(url, inputEl, outputId, previewId) {
+      const input = inputEl.value;
+      document.getElementById(outputId).textContent = "⏳ Loading...";
+      if (previewId) document.getElementById(previewId).textContent = "";
 
       try {
         const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ input })
         });
-
-        const text = await res.text();
-        let parsed = null;
-        try {
-          const obj = JSON.parse(text);
-          if (obj && obj.statusCode && obj.body) parsed = obj.body;
-        } catch (_) {}
-
-        out.textContent = parsed ?? text;
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}: ${text}`);
+        const data = await res.json();
+        document.getElementById(outputId).textContent = JSON.stringify(data, null, 2);
+        if (previewId) {
+          document.getElementById(previewId).textContent = "✅ Request completed successfully!";
+        }
       } catch (err) {
-        out.classList.add('error');
-        out.textContent = 'Error: ' + err.message;
-      } finally {
-        out.classList.remove('loading');
+        document.getElementById(outputId).textContent = "❌ Error: " + err.message;
       }
     }
 
-    /* ---------- wire buttons ---------- */
+    // wire buttons
     document.getElementById('btnGen').onclick = () =>
       callLambda(urlGen, document.getElementById('genInput'), 'genOutput', 'genPreview');
 
@@ -288,23 +175,12 @@
 
     document.getElementById('imageCheck').onclick = () =>
       callLambda(imgInput, document.getElementById('checkImagein'), 'checkImageOut', 'imagePreview');
-    
+
     document.getElementById('btnFinops').onclick = () =>
       callLambda(urlFinops, document.getElementById('genInput'), 'finopsOutput', 'genPreview');
 
     document.getElementById('btnWellArch').onclick = () =>
       callLambda(urlWellArch, document.getElementById('genInput'), 'wellArchOutput', 'genPreview');
-
-    /* ---------- attach drop zones ---------- */
-    enableDropZone(document.getElementById('genSection'),    document.getElementById('genPreview'));
-    enableDropZone(document.getElementById('checkSection'),  document.getElementById('checkPreview'));
-    enableDropZone(document.getElementById('imageSection'),  document.getElementById('imagePreview'));
-
-    /* ---------- manual file select for Image-to-Terraform ---------- */
-    document.getElementById('imageInputOnly').addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (file) renderPreview(file, document.getElementById('imagePreview'));
-    });
   </script>
 </body>
 </html>
