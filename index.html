@@ -28,7 +28,7 @@
   </style>
 </head>
 <body>
-  <h1>Terraform Tools UI</h1>
+  <h1>BCT Terraform Tools UI</h1>
 
   <!-- Section 1: Terraform Generator -->
   <div class="section drop-zone" id="genSection">
@@ -58,7 +58,7 @@
 
     <label>Upload Architecture Image:</label>
     <div class="file-input-wrapper">
-      <span class="file-btn">Choose Image</span>
+      <span class="file-btn" id="imageFileBtn">Choose Image</span>
       <input type="file" accept="image/*" id="imageInputOnly" />
     </div>
 
@@ -107,7 +107,6 @@
       out.innerHTML = '<div class="spinner"></div>';
       out.classList.remove('error');
       out.classList.add('loading');
-
       try {
         const res = await fetch(url, {
           method: 'POST',
@@ -141,7 +140,11 @@
       callLambda(urlCheck, payload, 'checkOutput');
     };
 
-    // Image-to-Terraform
+    // Image-to-Terraform: button triggers hidden input
+    document.getElementById('imageFileBtn').addEventListener('click', () => {
+      document.getElementById('imageInputOnly').click();
+    });
+
     document.getElementById('imageInputOnly').addEventListener('change', e => {
       const file = e.target.files[0];
       if (file) renderPreview(file, document.getElementById('imagePreview'));
@@ -151,15 +154,12 @@
       const rawText = document.getElementById('checkImagein').value;
       const fileInput = document.getElementById('imageInputOnly');
       const outEl = 'checkImageOut';
-
       if (!fileInput.files.length) {
         document.getElementById(outEl).textContent = '❌ Please select an image file!';
         return;
       }
-
       const file = fileInput.files[0];
       const reader = new FileReader();
-
       reader.onload = e => {
         const base64 = e.target.result.split(',')[1]; // remove data:image/...;base64,
         let data = base64;
@@ -167,7 +167,6 @@
         const payload = { type: "image", data };
         callLambda(urlImage, payload, outEl);
       };
-
       reader.readAsDataURL(file);
     };
 
