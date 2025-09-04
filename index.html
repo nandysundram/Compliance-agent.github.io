@@ -15,7 +15,7 @@
     h2 { color: #1a73e8; margin-top: 0; }
     label { display: block; font-weight: 600; margin-bottom: 6px; }
     textarea { width: 100%; height: 140px; font-family: 'Courier New', Courier, monospace; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 12px; resize: vertical; }
-    button, .file-btn { background-color: #1a73e8; color: white; border: none; border-radius: 6px; padding: 10px 16px; cursor: pointer; transition: background-color 0.2s ease-in-out; font-weight: 500; width: 180px; text-align: center; display: inline-block; }
+    button, .file-btn { background-color: #1a73e8; color: white; border: none; border-radius: 6px; padding: 10px 16px; cursor: pointer; transition: background-color 0.2s ease-in-out; font-weight: 500; width: 220px; text-align: center; display: inline-block; margin-right: 10px; margin-bottom: 10px; }
     button:hover, .file-btn:hover { background-color: #155ab6; }
     .output { background-color: #f9fbff; border-left: 4px solid #1a73e8; padding: 12px; margin-top: 15px; min-height: 30px; white-space: pre-wrap; border-radius: 6px; }
     .loading { opacity: 0.8; }
@@ -88,6 +88,17 @@
     <div id="wellArchOutput" class="output"></div>
   </div>
 
+  <!-- Section 6: FinOps & Compute Optimizer -->
+  <div class="section" id="finopsComputeSection">
+    <h2>📊 FinOps & Compute Optimizer</h2>
+    <button id="btnFinopsDashboard">View FinOps Dashboard</button>
+    <div id="finopsDashboardOutput" class="output"></div>
+    <canvas id="finopsDashboardChart"></canvas>
+
+    <button id="btnComputeOpt">Compute Optimizer Suggestion</button>
+    <div id="computeOptOutput" class="output"></div>
+  </div>
+
   <script>
     // Lambda function URLs
     const urlGen = "https://2jpdo3bst2rvpzymhebdgvgnma0msplp.lambda-url.ap-southeast-1.on.aws/";
@@ -95,6 +106,8 @@
     const urlImage = "https://horyvmwuwwf4zfunvy7a3kggiu0mmvvn.lambda-url.ap-southeast-1.on.aws/";
     const urlFinops = "https://2aggu3zily2qmrhxe7msg3crzq0dvvfc.lambda-url.ap-southeast-1.on.aws/";
     const urlWellArch = "https://<your-wellarch-lambda-url>";
+    const urlFinopsDashboard = "https://<your-finops-lambda-url>";
+    const urlComputeOpt = "https://<your-compute-optimizer-lambda-url>";
 
     function renderPreview(file, imgEl) {
       const reader = new FileReader();
@@ -173,7 +186,7 @@
       reader.readAsDataURL(file);
     };
 
-    // ✅ Updated FinOps
+    // Original FinOps
     document.getElementById('btnFinops').onclick = async () => {
       const out = document.getElementById('finopsOutput');
       const ctx = document.getElementById('finopsChart').getContext('2d');
@@ -207,24 +220,8 @@
 
         window.finopsChartInstance = new Chart(ctx, {
           type: 'bar',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: 'Cost in USD',
-              data: costs,
-              backgroundColor: 'rgba(54, 162, 235, 0.6)',
-              borderColor: 'rgba(54, 162, 235, 1)',
-              borderWidth: 1
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { display: false },
-              title: { display: true, text: 'Top AWS Services by Cost' }
-            },
-            scales: { y: { beginAtZero: true } }
-          }
+          data: { labels, datasets: [{ label: 'Cost in USD', data: costs, backgroundColor: 'rgba(54, 162, 235, 0.6)', borderColor: 'rgba(54, 162, 235, 1)', borderWidth: 1 }] },
+          options: { responsive: true, plugins: { legend: { display: false }, title: { display: true, text: 'Top AWS Services by Cost' } }, scales: { y: { beginAtZero: true } } }
         });
 
       } catch (err) {
@@ -237,6 +234,45 @@
     document.getElementById('btnWellArch').onclick = () => {
       const payload = { type: "text", data: document.getElementById('wellarchInput').value };
       callLambda(urlWellArch, payload, 'wellArchOutput');
+    };
+
+    // ✅ New FinOps Dashboard Button
+    document.getElementById('btnFinopsDashboard').onclick = async () => {
+      const out = document.getElementById('finopsDashboardOutput');
+      const ctx = document.getElementById('finopsDashboardChart').getContext('2d');
+      out.innerHTML = '<div class="spinner"></div>';
+      out.classList.remove('error');
+
+      try {
+        const res = await fetch(urlFinopsDashboard);
+        const data = await res.json();
+        const month = data?.month || "N/A";
+        const totalCost = data?.totalCost || 0;
+        const services = Array.isArray(data?.services) ? data.services : [];
+
+        out.innerHTML = `<h3>📊 FinOps Dashboard - ${month}</h3><p><b>Total Cost:</b> $${totalCost}</p><h4>Top ${services.length} Services</h4>`;
+        if (services.length === 0) { out.innerHTML += `<p>⚠️ No service cost data available</p>`; if(window.finopsDashboardChartInstance) window.finopsDashboardChartInstance.destroy(); return; }
+
+        const labels = services.map(s=>s.service||"Unknown");
+        const costs = services.map(s=>s.cost||0);
+
+        if(window.finopsDashboardChartInstance) window.finopsDashboardChartInstance.destroy();
+
+        window.finopsDashboardChartInstance = new Chart(ctx, { type:'bar', data:{ labels, datasets:[{ label:'Cost in USD', data:costs, backgroundColor:'rgba(54, 162, 235, 0.6)', borderColor:'rgba(54, 162, 235, 1)', borderWidth:1 }] }, options:{ responsive:true, plugins:{ legend:{ display:false }, title:{ display:true, text:'Top AWS Services by Cost' } }, scales:{ y:{ beginAtZero:true } } } });
+      } catch(err) { out.classList.add('error'); out.textContent = 'Error fetching FinOps Dashboard: '+err.message; }
+    };
+
+    // ✅ Compute Optimizer Button
+    document.getElementById('btnComputeOpt').onclick = async () => {
+      const out = document.getElementById('computeOptOutput');
+      out.innerHTML = '<div class="spinner"></div>';
+      out.classList.remove('error');
+
+      try {
+        const res = await fetch(urlComputeOpt);
+        const data = await res.json();
+        out.textContent = JSON.stringify(data,null,2);
+      } catch(err) { out.classList.add('error'); out.textContent = 'Error fetching Compute Optimizer data: '+err.message; }
     };
   </script>
 </body>
