@@ -6,34 +6,134 @@
   <title>BCT Terraform Tools UI</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: url('https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed; background-size: cover; color: #2c3e50; max-width: 960px; margin: auto; padding: 20px; }
-    h1 { text-align: center; color: #ffffff; text-shadow: 1px 1px 3px rgba(0,0,0,0.7); }
-    .section { background: rgba(255,255,255,0.95); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 30px; position: relative; }
-    .section.drop-zone { animation: pulseGlow 2s infinite; border: 2px dashed transparent; transition: border 0.3s; }
-    .section.drop-zone.dragover { border-color: #1a73e8; animation: none; }
-    @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(26, 115, 232, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(26, 115, 232, 0); } 100% { box-shadow: 0 0 0 0 rgba(26, 115, 232, 0); } }
-    h2 { color: #1a73e8; margin-top: 0; }
+    /* Background: animated gradient */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(-45deg, #1a73e8, #ff7f50, #00ff7f, #ff69b4);
+      background-size: 400% 400%;
+      animation: gradientBG 20s ease infinite;
+      color: #2c3e50;
+      max-width: 960px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    @keyframes gradientBG {
+      0% {background-position:0% 50%}
+      50% {background-position:100% 50%}
+      100% {background-position:0% 50%}
+    }
+
+    h1 {
+      text-align: center;
+      color: #ffffff;
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
+      font-size: 2.8rem;
+      animation: fadeInDown 1.5s ease;
+    }
+
+    @keyframes fadeInDown {
+      from {opacity: 0; transform: translateY(-20px);}
+      to {opacity:1; transform: translateY(0);}
+    }
+
+    .section {
+      background: rgba(255,255,255,0.95);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      padding: 20px;
+      margin-bottom: 30px;
+      position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .section:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+    }
+
+    h2 { 
+      color: #1a73e8; 
+      margin-top: 0; 
+      font-size: 1.8rem;
+      position: relative;
+    }
+    h2::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 3px;
+      background: #ff7f50;
+      margin-top: 6px;
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+    h2:hover::after { width: 100px; }
+
     label { display: block; font-weight: 600; margin-bottom: 6px; }
-    textarea { width: 100%; height: 140px; font-family: 'Courier New', Courier, monospace; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 12px; resize: vertical; }
-    button, .file-btn { background-color: #1a73e8; color: white; border: none; border-radius: 6px; padding: 10px 16px; cursor: pointer; transition: background-color 0.2s ease-in-out; font-weight: 500; width: 220px; text-align: center; display: inline-block; margin-right: 10px; margin-bottom: 10px; }
-    button:hover, .file-btn:hover { background-color: #155ab6; }
-    .output { background-color: #f9fbff; border-left: 4px solid #1a73e8; padding: 12px; margin-top: 15px; min-height: 30px; white-space: pre-wrap; border-radius: 6px; }
-    .loading { opacity: 0.8; }
-    .error { color: #d32f2f; }
-    .spinner { border: 4px solid #e3e3e3; border-top: 4px solid #1a73e8; border-radius: 50%; width: 28px; height: 28px; animation: spin 1s linear infinite; margin: 10px auto; }
+    textarea { width: 100%; height: 140px; font-family: 'Courier New', Courier, monospace; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 12px; resize: vertical; transition: box-shadow 0.3s; }
+    textarea:focus { box-shadow: 0 0 10px rgba(26,115,232,0.5); outline: none; }
+
+    button, .file-btn {
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      width: 220px;
+      text-align: center;
+      display: inline-block;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+
+    button:hover, .file-btn:hover {
+      background-color: #155ab6;
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(26,115,232,0.6);
+    }
+
+    .output {
+      background-color: #f9fbff;
+      border-left: 4px solid #1a73e8;
+      padding: 12px;
+      margin-top: 15px;
+      min-height: 30px;
+      white-space: pre-wrap;
+      border-radius: 6px;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    .output.visible { opacity: 1; }
+
+    .spinner {
+      border: 4px solid #e3e3e3;
+      border-top: 4px solid #1a73e8;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      animation: spin 1s linear infinite;
+      margin: 10px auto;
+    }
+
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
     input[type="file"] { display: none; }
     .preview { max-width: 100%; max-height: 300px; margin-top: 10px; border-radius: 8px; display: none; }
     .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; margin-top: 8px; margin-bottom: 10px; }
     .file-input-wrapper input[type="file"] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
-    canvas { margin-top: 20px; max-width: 100%; }
+    canvas { margin-top: 20px; max-width: 100%; transition: all 0.6s ease; }
+
   </style>
 </head>
 <body>
   <h1>BCT Terraform Tools UI</h1>
 
   <!-- Section 1: Terraform Generator -->
-  <div class="section drop-zone" id="genSection">
+  <div class="section" id="genSection">
     <h2>🛠️ Generate Terraform</h2>
     <label for="genInput">Description Input:</label>
     <textarea id="genInput" placeholder="Enter your project description..."></textarea>
@@ -43,7 +143,7 @@
   </div>
 
   <!-- Section 2: Terraform Compliance Checker -->
-  <div class="section drop-zone" id="checkSection">
+  <div class="section" id="checkSection">
     <h2>🔍 Check Compliance</h2>
     <label for="checkInput">Terraform HCL Input:</label>
     <textarea id="checkInput" placeholder="Paste your Terraform HCL here..."></textarea>
@@ -53,7 +153,7 @@
   </div>
 
   <!-- Section 3: Image to Terraform -->
-  <div class="section drop-zone" id="imageSection">
+  <div class="section" id="imageSection">
     <h2>🖼️ Image to Terraform Generator</h2>
     <label for="checkImagein">Optional Text Context:</label>
     <textarea id="checkImagein" placeholder="Enter any text context here..."></textarea>
@@ -69,26 +169,7 @@
     <img id="imagePreview" class="preview" alt="Uploaded preview"/>
   </div>
 
-  <!-- Section 4: FinOps Tools -->
-  <div class="section" id="extraSection">
-    <h2>⚙️ FinOps Tools</h2>
-    <label for="finopsInput">Description Input:</label>
-    <textarea id="finopsInput" placeholder="Enter description for FinOps suggestion..."></textarea>
-    <button id="btnFinops">FinOps Suggestion</button>
-    <div id="finopsOutput" class="output"></div>
-    <canvas id="finopsChart"></canvas>
-  </div>
-
-  <!-- Section 5: Well-Architected Tools -->
-  <div class="section" id="wellarchSection">
-    <h2>⚙️ Well-Architected Tools</h2>
-    <label for="wellarchInput">Description Input:</label>
-    <textarea id="wellarchInput" placeholder="Enter description for Well-Architected check..."></textarea>
-    <button id="btnWellArch">🏗️ Well-Architected Check</button>
-    <div id="wellArchOutput" class="output"></div>
-  </div>
-
-  <!-- Section 6: FinOps & Compute Optimizer -->
+  <!-- Section 4: FinOps & Compute Optimizer -->
   <div class="section" id="finopsComputeSection">
     <h2>📊 FinOps & Compute Optimizer</h2>
     <button id="btnFinopsDashboard">View FinOps Dashboard</button>
@@ -100,21 +181,17 @@
   </div>
 
   <script>
-    // Lambda function URLs
+    // Lambda URLs
     const urlGen = "https://2jpdo3bst2rvpzymhebdgvgnma0msplp.lambda-url.ap-southeast-1.on.aws/";
     const urlCheck = "https://kfjskb3ttrvcclvb7rw4t3d2na0aebcl.lambda-url.ap-southeast-1.on.aws/";
     const urlImage = "https://horyvmwuwwf4zfunvy7a3kggiu0mmvvn.lambda-url.ap-southeast-1.on.aws/";
-    const urlFinops = "https://2aggu3zily2qmrhxe7msg3crzq0dvvfc.lambda-url.ap-southeast-1.on.aws/";
-    const urlWellArch = "https://<your-wellarch-lambda-url>";
     const urlFinopsDashboard = "https://2aggu3zily2qmrhxe7msg3crzq0dvvfc.lambda-url.ap-southeast-1.on.aws/";
     const urlComputeOpt = "https://oluu5uhcgo4wiweqvudufymwki0jrdag.lambda-url.ap-southeast-1.on.aws/";
+    const urlWellArch = "https://<your-wellarch-lambda-url>";
 
     function renderPreview(file, imgEl) {
       const reader = new FileReader();
-      reader.onload = e => {
-        imgEl.src = e.target.result;
-        imgEl.style.display = 'block';
-      };
+      reader.onload = e => { imgEl.src = e.target.result; imgEl.style.display='block'; };
       reader.readAsDataURL(file);
     }
 
@@ -122,158 +199,74 @@
       const out = document.getElementById(outEl);
       out.innerHTML = '<div class="spinner"></div>';
       out.classList.remove('error');
-      out.classList.add('loading');
+      out.classList.add('visible');
       try {
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
+        const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
         const text = await res.text();
         let parsed = text;
-        try {
-          const obj = JSON.parse(text);
-          if (obj && obj.statusCode && obj.body) parsed = obj.body;
-        } catch (_) {}
+        try { const obj = JSON.parse(text); if(obj?.statusCode && obj?.body) parsed = obj.body; } catch(_){}
         out.textContent = parsed;
-      } catch (err) {
-        out.classList.add('error');
-        out.textContent = 'Error: ' + err.message;
-      } finally {
-        out.classList.remove('loading');
-      }
+      } catch(err) { out.classList.add('error'); out.textContent = 'Error: ' + err.message; }
     }
 
     // Terraform Generator
     document.getElementById('btnGen').onclick = () => {
-      const payload = { type: "text", data: document.getElementById('genInput').value };
-      callLambda(urlGen, payload, 'genOutput');
+      callLambda(urlGen, {type:"text", data:document.getElementById('genInput').value}, 'genOutput');
     };
 
     // Compliance Checker
     document.getElementById('btnCheck').onclick = () => {
-      const payload = { type: "text", data: document.getElementById('checkInput').value };
-      callLambda(urlCheck, payload, 'checkOutput');
+      callLambda(urlCheck, {type:"text", data:document.getElementById('checkInput').value}, 'checkOutput');
     };
 
     // Image-to-Terraform
-    document.getElementById('imageFileBtn').addEventListener('click', () => {
-      document.getElementById('imageInputOnly').click();
-    });
-
-    document.getElementById('imageInputOnly').addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (file) renderPreview(file, document.getElementById('imagePreview'));
-    });
-
+    document.getElementById('imageFileBtn').onclick = () => { document.getElementById('imageInputOnly').click(); };
+    document.getElementById('imageInputOnly').addEventListener('change', e => { const file = e.target.files[0]; if(file) renderPreview(file, document.getElementById('imagePreview')); });
     document.getElementById('imageCheck').onclick = () => {
-      const rawText = document.getElementById('checkImagein').value;
       const fileInput = document.getElementById('imageInputOnly');
-      const outEl = 'checkImageOut';
-      if (!fileInput.files.length) {
-        document.getElementById(outEl).textContent = '❌ Please select an image file!';
-        return;
-      }
+      const rawText = document.getElementById('checkImagein').value;
+      if(!fileInput.files.length) { document.getElementById('checkImageOut').textContent='❌ Please select an image file!'; return; }
       const file = fileInput.files[0];
       const reader = new FileReader();
       reader.onload = e => {
         const base64 = e.target.result.split(',')[1];
         let data = base64;
-        if (rawText.trim()) data += "\nContext: " + rawText;
-        const payload = { type: "image", data };
-        callLambda(urlImage, payload, outEl);
+        if(rawText.trim()) data += "\nContext: " + rawText;
+        callLambda(urlImage, {type:"image", data}, 'checkImageOut');
       };
       reader.readAsDataURL(file);
     };
 
-    // Original FinOps
-    document.getElementById('btnFinops').onclick = async () => {
-      const out = document.getElementById('finopsOutput');
-      const ctx = document.getElementById('finopsChart').getContext('2d');
-      out.innerHTML = '<div class="spinner"></div>';
-      out.classList.remove('error');
-
-      try {
-        const res = await fetch(urlFinops);
-        const data = await res.json();
-
-        const month = data?.month || "N/A";
-        const totalCost = data?.totalCost || 0;
-        const services = Array.isArray(data?.services) ? data.services : [];
-
-        out.innerHTML = `
-          <h3>📊 FinOps Dashboard - ${month}</h3>
-          <p><b>Total Cost:</b> $${totalCost}</p>
-          <h4>Top ${services.length} Services</h4>
-        `;
-
-        if (services.length === 0) {
-          out.innerHTML += `<p>⚠️ No service cost data available</p>`;
-          if (window.finopsChartInstance) window.finopsChartInstance.destroy();
-          return;
-        }
-
-        const labels = services.map(s => s.service || "Unknown");
-        const costs = services.map(s => s.cost || 0);
-
-        if (window.finopsChartInstance) window.finopsChartInstance.destroy();
-
-        window.finopsChartInstance = new Chart(ctx, {
-          type: 'bar',
-          data: { labels, datasets: [{ label: 'Cost in USD', data: costs, backgroundColor: 'rgba(54, 162, 235, 0.6)', borderColor: 'rgba(54, 162, 235, 1)', borderWidth: 1 }] },
-          options: { responsive: true, plugins: { legend: { display: false }, title: { display: true, text: 'Top AWS Services by Cost' } }, scales: { y: { beginAtZero: true } } }
-        });
-
-      } catch (err) {
-        out.classList.add('error');
-        out.textContent = 'Error fetching FinOps data: ' + err.message;
-      }
-    };
-
-    // Well-Architected
-    document.getElementById('btnWellArch').onclick = () => {
-      const payload = { type: "text", data: document.getElementById('wellarchInput').value };
-      callLambda(urlWellArch, payload, 'wellArchOutput');
-    };
-
-    // ✅ New FinOps Dashboard Button
+    // FinOps Dashboard
     document.getElementById('btnFinopsDashboard').onclick = async () => {
       const out = document.getElementById('finopsDashboardOutput');
       const ctx = document.getElementById('finopsDashboardChart').getContext('2d');
       out.innerHTML = '<div class="spinner"></div>';
-      out.classList.remove('error');
-
       try {
         const res = await fetch(urlFinopsDashboard);
         const data = await res.json();
         const month = data?.month || "N/A";
         const totalCost = data?.totalCost || 0;
         const services = Array.isArray(data?.services) ? data.services : [];
-
         out.innerHTML = `<h3>📊 FinOps Dashboard - ${month}</h3><p><b>Total Cost:</b> $${totalCost}</p><h4>Top ${services.length} Services</h4>`;
-        if (services.length === 0) { out.innerHTML += `<p>⚠️ No service cost data available</p>`; if(window.finopsDashboardChartInstance) window.finopsDashboardChartInstance.destroy(); return; }
-
-        const labels = services.map(s=>s.service||"Unknown");
-        const costs = services.map(s=>s.cost||0);
-
-        if(window.finopsDashboardChartInstance) window.finopsDashboardChartInstance.destroy();
-
-        window.finopsDashboardChartInstance = new Chart(ctx, { type:'bar', data:{ labels, datasets:[{ label:'Cost in USD', data:costs, backgroundColor:'rgba(54, 162, 235, 0.6)', borderColor:'rgba(54, 162, 235, 1)', borderWidth:1 }] }, options:{ responsive:true, plugins:{ legend:{ display:false }, title:{ display:true, text:'Top AWS Services by Cost' } }, scales:{ y:{ beginAtZero:true } } } });
-      } catch(err) { out.classList.add('error'); out.textContent = 'Error fetching FinOps Dashboard: '+err.message; }
+        if(services.length===0){ out.innerHTML+='<p>⚠️ No service cost data available</p>'; return; }
+        const labels=services.map(s=>s.service||"Unknown");
+        const costs=services.map(s=>s.cost||0);
+        new Chart(ctx, { type:'bar', data:{ labels, datasets:[{ label:'Cost in USD', data:costs, backgroundColor:'rgba(54,162,235,0.6)', borderColor:'rgba(54,162,235,1)', borderWidth:1 }] }, options:{ responsive:true, plugins:{ legend:{display:false}, title:{display:true,text:'Top AWS Services by Cost'} }, scales:{ y:{ beginAtZero:true } } } });
+      } catch(err){ out.classList.add('error'); out.textContent='Error fetching FinOps Dashboard: '+err.message; }
     };
 
-    // ✅ Compute Optimizer Button
+    // Compute Optimizer
     document.getElementById('btnComputeOpt').onclick = async () => {
       const out = document.getElementById('computeOptOutput');
       out.innerHTML = '<div class="spinner"></div>';
-      out.classList.remove('error');
-
       try {
         const res = await fetch(urlComputeOpt);
         const data = await res.json();
         out.textContent = JSON.stringify(data,null,2);
-      } catch(err) { out.classList.add('error'); out.textContent = 'Error fetching Compute Optimizer data: '+err.message; }
+      } catch(err){ out.classList.add('error'); out.textContent='Error fetching Compute Optimizer data: '+err.message; }
     };
+
   </script>
 </body>
 </html>
