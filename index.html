@@ -173,7 +173,7 @@
       reader.readAsDataURL(file);
     };
 
-    // FinOps
+    // ✅ Updated FinOps
     document.getElementById('btnFinops').onclick = async () => {
       const out = document.getElementById('finopsOutput');
       const ctx = document.getElementById('finopsChart').getContext('2d');
@@ -184,21 +184,27 @@
         const res = await fetch(urlFinops);
         const data = await res.json();
 
-        // Render dashboard text
+        const month = data?.month || "N/A";
+        const totalCost = data?.totalCost || 0;
+        const services = Array.isArray(data?.services) ? data.services : [];
+
         out.innerHTML = `
-          <h3>📊 FinOps Dashboard - ${data.month}</h3>
-          <p><b>Total Cost:</b> $${data.totalCost}</p>
-          <h4>Top 5 Services</h4>
+          <h3>📊 FinOps Dashboard - ${month}</h3>
+          <p><b>Total Cost:</b> $${totalCost}</p>
+          <h4>Top ${services.length} Services</h4>
         `;
 
-        // Prepare chart data
-        const labels = data.services.map(s => s.service);
-        const costs = data.services.map(s => s.cost);
+        if (services.length === 0) {
+          out.innerHTML += `<p>⚠️ No service cost data available</p>`;
+          if (window.finopsChartInstance) window.finopsChartInstance.destroy();
+          return;
+        }
 
-        // Destroy existing chart if exists
+        const labels = services.map(s => s.service || "Unknown");
+        const costs = services.map(s => s.cost || 0);
+
         if (window.finopsChartInstance) window.finopsChartInstance.destroy();
 
-        // Create bar chart
         window.finopsChartInstance = new Chart(ctx, {
           type: 'bar',
           data: {
@@ -215,7 +221,7 @@
             responsive: true,
             plugins: {
               legend: { display: false },
-              title: { display: true, text: 'Top 5 AWS Services by Cost' }
+              title: { display: true, text: 'Top AWS Services by Cost' }
             },
             scales: { y: { beginAtZero: true } }
           }
