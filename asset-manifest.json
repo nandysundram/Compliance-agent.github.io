@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/Compliance-agent.github.io/static/css/main.9a6b4091.css",
+    "main.js": "/Compliance-agent.github.io/static/js/main.15ccf542.js",
+    "index.html": "/Compliance-agent.github.io/index.html",
+    "main.9a6b4091.css.map": "/Compliance-agent.github.io/static/css/main.9a6b4091.css.map",
+    "main.15ccf542.js.map": "/Compliance-agent.github.io/static/js/main.15ccf542.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.9a6b4091.css",
+    "static/js/main.15ccf542.js"
+  ]
+}
