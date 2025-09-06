@@ -1,11 +1,11 @@
 import React from 'react';
 
 const tools = [
-  { name: 'Terraform Code Generator', url: 'https://your-lambda-url-terraform', description: 'Generate Terraform code easily.' },
-  { name: 'Image to Terraform Code', url: 'https://your-lambda-url-image-to-terraform', description: 'Convert an architecture image to Terraform code.' },
-  { name: 'Compliance Checker', url: 'https://your-lambda-url-compliance-checker', description: 'Check your infrastructure compliance.' },
-  { name: 'FinOps Dashboard', url: 'https://your-lambda-url-finops-dashboard', description: 'Monitor cloud financial health and usage.' },
-  { name: 'AWS Well-Architected Tool', url: 'https://your-lambda-url-well-architected', description: 'Review your architecture against AWS best practices.' },
+  { name: 'Terraform Code Generator', url: 'https://2jpdo3bst2rvpzymhebdgvgnma0msplp.lambda-url.ap-southeast-1.on.aws/', description: 'Generate Terraform code easily.' },
+  { name: 'Image to Terraform Code', url: 'https://horyvmwuwwf4zfunvy7a3kggiu0mmvvn.lambda-url.ap-southeast-1.on.aws/', description: 'Convert an architecture image to Terraform code.' },
+  { name: 'Compliance Checker', url: 'https://kfjskb3ttrvcclvb7rw4t3d2na0aebcl.lambda-url.ap-southeast-1.on.aws/', description: 'Check your infrastructure compliance.' },
+  { name: 'FinOps Dashboard', url: 'https://2aggu3zily2qmrhxe7msg3crzq0dvvfc.lambda-url.ap-southeast-1.on.aws/', description: 'Monitor cloud financial health and usage.' },
+  { name: 'AWS Optimizer', url: 'https://oluu5uhcgo4wiweqvudufymwki0jrdag.lambda-url.ap-southeast-1.on.aws/', description: 'Review your architecture against AWS best practices.' },
 ];
 
 function App() {
