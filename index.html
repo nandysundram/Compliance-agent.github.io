@@ -1,1 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BCT Terraform Tools UI</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Custom CSS for Blue & White Theme and Effects -->
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: url('https://images.unsplash.com/photo-1516321310762-6d8c7e07c0f8?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+      max-width: 960px;
+      margin: auto;
+      padding: 20px;
+    }
 
+    h1 {
+      text-align: center;
+      color: #fff;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+      font-size: 2.5rem;
+      animation: fadeInDown 1s ease-in-out;
+    }
+
+    /* Section Styling */
+    .section {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      margin-bottom: 30px;
+      position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .section:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+    .section.drop-zone {
+      animation: pulseGlow 2s infinite;
+      border: 2px dashed transparent;
+      transition: border 0.3s;
+    }
+    .section.drop-zone.dragover {
+      border-color: #007bff;
+      animation: none;
+    }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(0, 123, 255, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); }
+    }
+
+    h2 {
+      color: #007bff;
+      margin-top: 0;
+      font-size: 1.8rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #333;
+    }
+
+    textarea {
+      width: 100%;
+      height: 140px;
+      font-family: 'Courier New', Courier, monospace;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 12px;
+      resize: vertical;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    textarea:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+      outline: none;
+    }
+
+    button, .file-btn {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      width: 220px;
+      text-align: center;
+      display: inline-block;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    button:hover, .file-btn:hover {
+      background-color: #0056b3;
+      transform: scale(1.05);
+    }
+
+    .output {
+      background-color: #f9fbff;
+      border-left: 4px solid #007bff;
+      padding: 12px;
+      margin-top: 15px;
+      min-height: 30px;
+      white-space: pre-wrap;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+    }
+
+    .loading {
+      opacity: 0.8;
+    }
+
+    .error {
+      color: #d32f2f;
+      border-left: 4px solid #d32f2f;
+    }
+
+    .spinner {
+      border: 4px solid #e3e3e3;
+      border-top: 4px solid #007bff;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      animation: spin 1s linear infinite;
+      margin: 10px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      margin-top: 8px;
+      margin-bottom: 10px;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      font-size: 100px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .preview {
+      max-width: 100%;
+      max-height: 300px;
+      margin-top: 10px;
+      border-radius: 8px;
+      display: none;
+      border: 1px solid #007bff;
+    }
+
+    canvas {
+      margin-top: 20px;
+      max-width: 100%;
+      border-radius: 8px;
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+      0% { opacity: 0; transform: translateY(-20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+      h2 {
+        font-size: 1.5rem;
+      }
+      button, .file-btn {
+        width: 100%;
+        margin-right: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #007bff;">
+    <div class="container">
+      <a class="navbar-brand" href="#">BCT Terraform Tools</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#genSection">Generate</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#checkSection">Compliance</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#imageSection">Image to Terraform</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#extraSection">FinOps</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#wellarchSection">Well-Architected</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#finopsComputeSection">Compute Optimizer</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <h1>BCT Terraform Tools UI</h1>
+
+  <!-- Section 1: Terraform Generator -->
+  <div class="section drop-zone" id="genSection">
+    <h2>🛠️ Generate Terraform</h2>
+    <label for="genInput">Description Input:</label>
+    <textarea id="genInput" placeholder="Enter your project description..." class="form-control"></textarea>
+    <button id="btnGen" class="btn">Run Generate</button>
+    <div id="genOutput" class="output"></div>
+    <img id="genPreview" class="preview" alt="Uploaded preview"/>
+  </div>
+
+  <!-- Section 2: Terraform Compliance Checker -->
+  <div class="section drop-zone" id="checkSection">
+    <h2>🔍 Check Compliance</h2>
+    <label for="checkInput">Terraform HCL Input:</label>
+    <textarea id="checkInput" placeholder="Paste your Terraform HCL here..." class="form-control"></textarea>
+    <button id="btnCheck" class="btn">Run Compliance</button>
+    <div id="checkOutput" class="output"></div>
+    <img id="checkPreview" class="preview" alt="Uploaded preview"/>
+  </div>
+
+  <!-- Section 3: Image to Terraform -->
+  <div class="section drop-zone" id="imageSection">
+    <h2>🖼️ Image to Terraform Generator</h2>
+    <label for="checkImagein">Optional Text Context:</label>
+    <textarea id="checkImagein" placeholder="Enter any text context here..." class="form-control"></textarea>
+    <label>Upload Architecture Image:</label>
+    <div class="file-input-wrapper">
+      <span class="file-btn" id="imageFileBtn">Choose Image</span>
+      <input type="file" accept="image/*" id="imageInputOnly" />
+    </div>
+    <button id="imageCheck" class="btn">Generate Code</button>
+    <div id="checkImageOut" class="output"></div>
+    <img id="imagePreview" class="preview" alt="Uploaded preview"/>
+  </div>
+
+  <!-- Section 4: FinOps Tools -->
+  <div class="section" id="extraSection">
+    <h2>⚙️ FinOps Tools</h2>
+    <label for="finopsInput">Description Input:</label>
+    <textarea id="finopsInput" placeholder="Enter description for FinOps suggestion..." class="form-control"></textarea>
+    <button id="btnFinops" class="btn">FinOps Suggestion</button>
+    <div id="finopsOutput" class="output"></div>
+    <canvas id="finopsChart"></canvas>
+  </div>
+
+  <!-- Section 5: Well-Architected Tools -->
+  <div class="section" id="wellarchSection">
+    <h2>⚙️ Well-Architected Tools</h2>
+    <label for="wellarchInput">Description Input:</label>
+    <textarea id="wellarchInput" placeholder="Enter description for Well-Architected check..." class="form-control"></textarea>
+    <button id="btnWellArch" class="btn">🏗️ Well-Architected Check</button>
+    <div id="wellArchOutput" class="output"></div>
+  </div>
+
+  <!-- Section 6: FinOps & Compute Optimizer -->
+  <div class="section" id="finopsComputeSection">
+    <h2>📊 FinOps & Compute Optimizer</h2>
+    <button id="btnFinopsDashboard" class="btn">View FinOps Dashboard</button>
+    <div id="finopsDashboardOutput" class="output"></div>
+    <canvas id="finopsDashboardChart"></canvas>
+    <button id="btnComputeOpt" class="btn">Compute Optimizer Suggestion</button>
+    <div id="computeOptOutput" class="output"></div>
+  </div>
+
+  <!-- Footer -->
+  <footer style="background-color: #007bff; color: #fff; padding: 20px 0; text-align: center;">
+    <div class="container">
+      <p>&copy; 2025 BCT Terraform Tools. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS and Popper.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+  <!-- Custom JavaScript -->
+  <script>
+    // Lambda function URLs
+    const urlGen = "https://2jpdo3bst2rvpzymhebdgvgnma0msplp.lambda-url.ap-southeast-1.on.aws/";
+    const urlCheck = "https://kfjskb3ttrvcclvb7rw4t3d2na0aebcl.lambda-url.ap-southeast-1.on.aws/";
+    const urlImage = "https://horyvmwuwwf4zfunvy7a3kggiu0mmvvn.lambda-url.ap-southeast-1.on.aws/";
+    const urlFinops = "https://2aggu3zily2qmrhxe7msg3crzq0dvvfc.lambda-url.ap-southeast-1.on.aws/";
+    const urlWellArch = "https://<your-wellarch-lambda-url>";
+    const urlFinopsDashboard = "https://2aggu3zily2qmrhxe7msg3crzq0dvvfc.lambda-url.ap-southeast-1.on.aws/";
+    const urlComputeOpt = "https://oluu5uhcgo4wiweqvudufymwki0jrdag.lambda-url.ap-southeast-1.on.aws/";
+
+    function renderPreview(file, imgEl) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        imgEl.src = e.target.result;
+        imgEl.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function callLambda(url, payload, outEl) {
+      const out = document.getElementById(outEl);
+      out.innerHTML = '<div class="spinner"></div>';
+      out.classList.remove('error');
+      out.classList.add('loading');
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const text = await res.text();
+        let parsed = text;
+        try {
+          const obj = JSON.parse(text);
+          if (obj && obj.statusCode && obj.body) parsed = obj.body;
+        } catch (_) {}
+        out.textContent = parsed;
+      } catch (err) {
+        out.classList.add('error');
+        out.textContent = 'Error: ' + err.message;
+      } finally {
+        out.classList.remove('loading');
+      }
+    }
+
+    // Terraform Generator
+    document.getElementById('btnGen').onclick = () => {
+      const payload = { type: "text", data: document.getElementById('genInput').value };
+      callLambda(urlGen, payload, 'genOutput');
+    };
+
+    // Compliance Checker
+    document.getElementById('btnCheck').onclick = () => {
+      const payload = { type: "text", data: document.getElementById('checkInput').value };
+      callLambda(urlCheck, payload, 'checkOutput');
+    };
+
+    // Image-to-Terraform
+    document.getElementById('imageFileBtn').addEventListener('click', () => {
+      document.getElementById('imageInputOnly').click();
+    });
+
+    document.getElementById('imageInputOnly').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (file) renderPreview(file, document.getElementById('imagePreview'));
+    });
+
+    document.getElementById('imageCheck').onclick = () => {
+      const rawText = document.getElementById('checkImagein').value;
+      const fileInput = document.getElementById('imageInputOnly');
+      const outEl = 'checkImageOut';
+      if (!fileInput.files.length) {
+        document.getElementById(outEl).textContent = '❌ Please select an image file!';
+        return;
+      }
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onload = e => {
+        const base64 = e.target.result.split(',')[1];
+        let data = base64;
+        if (rawText.trim()) data += "\nContext: " + rawText;
+        const payload = { type: "image", data };
+        callLambda(urlImage, payload, outEl);
+      };
+      reader.readAsDataURL(file);
+    };
+
+    // Original FinOps
+    document.getElementById('btnFinops').onclick = async () => {
+      const out = document.getElementById('finopsOutput');
+      const ctx = document.getElementById('finopsChart').getContext('2d');
+      out.innerHTML = '<div class="spinner"></div>';
+      out.classList.remove('error');
+      try {
+        const res = await fetch(urlFinops);
+        const data = await res.json();
+        const month = data?.month || "N/A";
+        const totalCost = data?.totalCost || 0;
+        const services = Array.isArray(data?.services) ? data.services : [];
+        out.innerHTML = `
+          <h3>📊 FinOps Dashboard - ${month}</h3>
+          <p><b>Total Cost:</b> $${totalCost}</p>
+          <h4>Top ${services.length} Services</h4>
+        `;
+        if (services.length === 0) {
+          out.innerHTML += `<p>⚠️ No service cost data available</p>`;
+          if (window.finopsChartInstance) window.finopsChartInstance.destroy();
+          return;
+        }
+        const labels = services.map(s => s.service || "Unknown");
+        const costs = services.map(s => s.cost || 0);
+        if (window.finopsChartInstance) window.finopsChartInstance.destroy();
+        window.finopsChartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: { labels, datasets: [{ label: 'Cost in USD', data: costs, backgroundColor: 'rgba(0, 123, 255, 0.6)', borderColor: 'rgba(0, 123, 255, 1)', borderWidth: 1 }] },
+          options: { responsive: true, plugins: { legend: { display: false }, title: { display: true, text: 'Top AWS Services by Cost' } }, scales: { y: { beginAtZero: true } } }
+        });
+      } catch (err) {
+        out.classList.add('error');
+        out.textContent = 'Error fetching FinOps data: ' + err.message;
+      }
+    };
+
+    // Well-Architected
+    document.getElementById('btnWellArch').onclick = () => {
+      const payload = { type: "text", data: document.getElementById('wellarchInput').value };
+      callLambda(urlWellArch, payload, 'wellArchOutput');
+    };
+
+    // FinOps Dashboard Button
+    document.getElementById('btnFinopsDashboard').onclick = async () => {
+      const out = document.getElementById('finopsDashboardOutput');
+      const ctx = document.getElementById('finopsDashboardChart').getContext('2d');
+      out.innerHTML = '<div class="spinner"></div>';
+      out.classList.remove('error');
+      try {
+        const res = await fetch(urlFinopsDashboard);
+        const data = await res.json();
+        const month = data?.month || "N/A";
+        const totalCost = data?.totalCost || 0;
+        const services = Array.isArray(data?.services) ? data.services : [];
+        out.innerHTML = `<h3>📊 FinOps Dashboard - ${month}</h3><p><b>Total Cost:</b> $${totalCost}</p><h4>Top ${services.length} Services</h4>`;
+        if (services.length === 0) {
+          out.innerHTML += `<p>⚠️ No service cost data available</p>`;
+          if (window.finopsDashboardChartInstance) window.finopsDashboardChartInstance.destroy();
+          return;
+        }
+        const labels = services.map(s => s.service || "Unknown");
+        const costs = services.map(s => s.cost || 0);
+        if (window.finopsDashboardChartInstance) window.finopsDashboardChartInstance.destroy();
+        window.finopsDashboardChartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: { labels, datasets: [{ label: 'Cost in USD', data: costs, backgroundColor: 'rgba(0, 123, 255, 0.6)', borderColor: 'rgba(0, 123, 255, 1)', borderWidth: 1 }] },
+          options: { responsive: true, plugins: { legend: { display: false }, title: { display: true, text: 'Top AWS Services by Cost' } }, scales: { y: { beginAtZero: true } } }
+        });
+      } catch (err) {
+        out.classList.add('error');
+        out.textContent = 'Error fetching FinOps Dashboard: ' + err.message;
+      }
+    };
+
+    // Compute Optimizer Button
+    document.getElementById('btnComputeOpt').onclick = async () => {
+      const out = document.getElementById('computeOptOutput');
+      out.innerHTML = '<div class="spinner"></div>';
+      out.classList.remove('error');
+      try {
+        const res = await fetch(urlComputeOpt);
+        const data = await res.json();
+        out.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        out.classList.add('error');
+        out.textContent = 'Error fetching Compute Optimizer data: ' + err.message;
+      }
+    };
+  </script>
+</body>
+</html>
