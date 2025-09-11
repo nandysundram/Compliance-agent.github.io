@@ -28,7 +28,6 @@
       animation: fadeInDown 1s ease-in-out;
     }
 
-    /* Section Styling */
     .section {
       background: rgba(255, 255, 255, 0.95);
       border-radius: 15px;
@@ -177,13 +176,11 @@
       border-radius: 8px;
     }
 
-    /* Animations */
     @keyframes fadeInDown {
       0% { opacity: 0; transform: translateY(-20px); }
       100% { opacity: 1; transform: translateY(0); }
     }
 
-    /* Responsive Adjustments */
     @media (max-width: 768px) {
       h1 {
         font-size: 2rem;
@@ -199,33 +196,20 @@
   </style>
 </head>
 <body>
-  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #007bff;">
     <div class="container">
       <a class="navbar-brand" href="#">BCT Terraform Tools</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="#genSection">Generate</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#checkSection">Compliance</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#imageSection">Image to Terraform</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#extraSection">FinOps</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#wellarchSection">Well-Architected</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#finopsComputeSection">Compute Optimizer</a>
-          </li>
+          <li class="nav-item"><a class="nav-link" href="#genSection">Generate</a></li>
+          <li class="nav-item"><a class="nav-link" href="#checkSection">Compliance</a></li>
+          <li class="nav-item"><a class="nav-link" href="#imageSection">Image to Terraform</a></li>
+          <li class="nav-item"><a class="nav-link" href="#extraSection">FinOps</a></li>
+          <li class="nav-item"><a class="nav-link" href="#wellarchSection">Well-Architected</a></li>
+          <li class="nav-item"><a class="nav-link" href="#finopsComputeSection">Compute Optimizer</a></li>
         </ul>
       </div>
     </div>
@@ -233,7 +217,6 @@
 
   <h1>BCT Terraform Tools UI</h1>
 
-  <!-- Section 1: Terraform Generator -->
   <div class="section drop-zone" id="genSection">
     <h2>🛠️ Generate Terraform</h2>
     <label for="genInput">Description Input:</label>
@@ -243,7 +226,6 @@
     <img id="genPreview" class="preview" alt="Uploaded preview"/>
   </div>
 
-  <!-- Section 2: Terraform Compliance Checker -->
   <div class="section drop-zone" id="checkSection">
     <h2>🔍 Check Compliance</h2>
     <label for="checkInput">Terraform HCL Input:</label>
@@ -253,7 +235,6 @@
     <img id="checkPreview" class="preview" alt="Uploaded preview"/>
   </div>
 
-  <!-- Section 3: Image to Terraform -->
   <div class="section drop-zone" id="imageSection">
     <h2>🖼️ Image to Terraform Generator</h2>
     <label for="checkImagein">Optional Text Context:</label>
@@ -268,7 +249,6 @@
     <img id="imagePreview" class="preview" alt="Uploaded preview"/>
   </div>
 
-  <!-- Section 4: FinOps Tools -->
   <div class="section" id="extraSection">
     <h2>⚙️ FinOps Tools</h2>
     <label for="finopsInput">Description Input:</label>
@@ -278,7 +258,6 @@
     <canvas id="finopsChart"></canvas>
   </div>
 
-  <!-- Section 5: Well-Architected Tools -->
   <div class="section" id="wellarchSection">
     <h2>⚙️ Well-Architected Tools</h2>
     <label for="wellarchInput">Description Input:</label>
@@ -287,34 +266,29 @@
     <div id="wellArchOutput" class="output"></div>
   </div>
 
-  <!-- Section 6: FinOps & Compute Optimizer -->
   <div class="section" id="finopsComputeSection">
-    <h2> 🏗️ Compute Optimizer</h2>
+    <h2>🏗️ Compute Optimizer</h2>
     <label for="computeInput">Description Input:</label>
     <textarea id="computeInput" placeholder="Click to get the suggestions" class="form-control"></textarea>
     <button id="btnComputeOpt" class="btn">Compute Optimizer Suggestion</button>
     <div id="computeOptOutput" class="output"></div>
   </div>
 
-  <!-- Footer -->
   <footer style="background-color: #007bff; color: #fff; padding: 20px 0; text-align: center;">
     <div class="container">
       <p>&copy; 2025 BCT Terraform Tools. All rights reserved.</p>
     </div>
   </footer>
 
-  <!-- Bootstrap JS and Popper.js -->
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
-  <!-- Custom JavaScript -->
+
   <script>
-    // Lambda function URLs
     const urlGen = "https://2jpdo3bst2rvpzymhebdgvgnma0msplp.lambda-url.ap-southeast-1.on.aws/";
     const urlCheck = "https://kfjskb3ttrvcclvb7rw4t3d2na0aebcl.lambda-url.ap-southeast-1.on.aws/";
     const urlImage = "https://horyvmwuwwf4zfunvy7a3kggiu0mmvvn.lambda-url.ap-southeast-1.on.aws/";
     const urlFinops = "https://2aggu3zily2qmrhxe7msg3crzq0dvvfc.lambda-url.ap-southeast-1.on.aws/";
     const urlWellArch = "https://<your-wellarch-lambda-url>";
-    const urlFinopsDashboard = "https://2aggu3zily2qmrhxe7msg3crzq0dvvfc.lambda-url.ap-southeast-1.on.aws/";
     const urlComputeOpt = "https://oluu5uhcgo4wiweqvudufymwki0jrdag.lambda-url.ap-southeast-1.on.aws/";
 
     function renderPreview(file, imgEl) {
@@ -352,19 +326,16 @@
       }
     }
 
-    // Terraform Generator
     document.getElementById('btnGen').onclick = () => {
       const payload = { type: "text", data: document.getElementById('genInput').value };
       callLambda(urlGen, payload, 'genOutput');
     };
 
-    // Compliance Checker
     document.getElementById('btnCheck').onclick = () => {
       const payload = { type: "text", data: document.getElementById('checkInput').value };
       callLambda(urlCheck, payload, 'checkOutput');
     };
 
-    // Image-to-Terraform
     document.getElementById('imageFileBtn').addEventListener('click', () => {
       document.getElementById('imageInputOnly').click();
     });
@@ -394,7 +365,6 @@
       reader.readAsDataURL(file);
     };
 
-    // Original FinOps
     document.getElementById('btnFinops').onclick = async () => {
       const out = document.getElementById('finopsOutput');
       const ctx = document.getElementById('finopsChart').getContext('2d');
@@ -430,51 +400,22 @@
       }
     };
 
-    // Well-Architected
     document.getElementById('btnWellArch').onclick = () => {
       const payload = { type: "text", data: document.getElementById('wellarchInput').value };
       callLambda(urlWellArch, payload, 'wellArchOutput');
     };
 
-    // FinOps Dashboard Button
-    document.getElementById('btnFinopsDashboard').onclick = async () => {
-      const out = document.getElementById('finopsDashboardOutput');
-      const ctx = document.getElementById('finopsDashboardChart').getContext('2d');
-      out.innerHTML = '<div class="spinner"></div>';
-      out.classList.remove('error');
-      try {
-        const res = await fetch(urlFinopsDashboard);
-        const data = await res.json();
-        const month = data?.month || "N/A";
-        const totalCost = data?.totalCost || 0;
-        const services = Array.isArray(data?.services) ? data.services : [];
-        out.innerHTML = `<h3>📊 FinOps Dashboard - ${month}</h3><p><b>Total Cost:</b> $${totalCost}</p><h4>Top ${services.length} Services</h4>`;
-        if (services.length === 0) {
-          out.innerHTML += `<p>⚠️ No service cost data available</p>`;
-          if (window.finopsDashboardChartInstance) window.finopsDashboardChartInstance.destroy();
-          return;
-        }
-        const labels = services.map(s => s.service || "Unknown");
-        const costs = services.map(s => s.cost || 0);
-        if (window.finopsDashboardChartInstance) window.finopsDashboardChartInstance.destroy();
-        window.finopsDashboardChartInstance = new Chart(ctx, {
-          type: 'bar',
-          data: { labels, datasets: [{ label: 'Cost in USD', data: costs, backgroundColor: 'rgba(0, 123, 255, 0.6)', borderColor: 'rgba(0, 123, 255, 1)', borderWidth: 1 }] },
-          options: { responsive: true, plugins: { legend: { display: false }, title: { display: true, text: 'Top AWS Services by Cost' } }, scales: { y: { beginAtZero: true } } }
-        });
-      } catch (err) {
-        out.classList.add('error');
-        out.textContent = 'Error fetching FinOps Dashboard: ' + err.message;
-      }
-    };
-
-    // Compute Optimizer Button
     document.getElementById('btnComputeOpt').onclick = async () => {
       const out = document.getElementById('computeOptOutput');
       out.innerHTML = '<div class="spinner"></div>';
       out.classList.remove('error');
+      const payload = { type: "text", data: document.getElementById('computeInput').value };
       try {
-        const res = await fetch(urlComputeOpt);
+        const res = await fetch(urlComputeOpt, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
         const data = await res.json();
         out.textContent = JSON.stringify(data, null, 2);
       } catch (err) {
