@@ -190,6 +190,7 @@
 
   <h1>BCT Terraform Tools UI</h1>
 
+  <!-- Generate Section -->
   <div class="section drop-zone" id="genSection">
     <h2>🛠️ Generate Terraform</h2>
     <label for="genInput">Description Input:</label>
@@ -199,6 +200,7 @@
     <img id="genPreview" class="preview" alt="Uploaded preview"/>
   </div>
 
+  <!-- Compliance Section -->
   <div class="section drop-zone" id="checkSection">
     <h2>🔍 Check Compliance</h2>
     <label for="checkInput">Terraform HCL Input:</label>
@@ -208,6 +210,7 @@
     <img id="checkPreview" class="preview" alt="Uploaded preview"/>
   </div>
 
+  <!-- Image to Terraform Section -->
   <div class="section drop-zone" id="imageSection">
     <h2>🖼️ Image to Terraform Generator</h2>
     <label for="checkImagein">Optional Text Context:</label>
@@ -222,6 +225,7 @@
     <img id="imagePreview" class="preview" alt="Uploaded preview"/>
   </div>
 
+  <!-- FinOps Section -->
   <div class="section" id="extraSection">
     <h2>⚙️ FinOps Tools</h2>
     <label for="finopsInput">Description Input:</label>
@@ -231,6 +235,7 @@
     <canvas id="finopsChart"></canvas>
   </div>
 
+  <!-- Well-Architected Section -->
   <div class="section" id="wellarchSection">
     <h2>⚙️ Well-Architected Tools</h2>
     <label for="wellarchInput">Description Input:</label>
@@ -241,6 +246,7 @@
     <div id="wellArchOutput" class="output"></div>
   </div>
 
+  <!-- Compute Optimizer Section -->
   <div class="section" id="finopsComputeSection">
     <h2>🏗️ Compute Optimizer</h2>
     <label for="computeInput">Description Input:</label>
@@ -260,6 +266,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
 
   <script>
+    // Replace these URLs with your deployed Lambda function URLs
     const urlGen = "https://2jpdo3bst2rvpzymhebdgvgnma0msplp.lambda-url.ap-southeast-1.on.aws/";
     const urlCheck = "https://kfjskb3ttrvcclvb7rw4t3d2na0aebcl.lambda-url.ap-southeast-1.on.aws/";
     const urlImage = "https://horyvmwuwwf4zfunvy7a3kggiu0mmvvn.lambda-url.ap-southeast-1.on.aws/";
@@ -342,53 +349,27 @@
       callLambda(urlWellArch,{type:"text",data:document.getElementById('wellarchInput').value},'wellArchOutput');
     };
 
-    // Compute Optimizer
+    // Compute Optimizer Section
     document.getElementById('btnComputeOpt').onclick = async () => {
-      const out = document.getElementById('computeOptOutput');
-      const ctx = document.getElementById('computeChart').getContext('2d');
-      out.innerHTML = '<div class="spinner"></div>'; 
+      const out=document.getElementById('computeOptOutput');
+      const ctx=document.getElementById('computeChart').getContext('2d');
+      out.innerHTML='<div class="spinner"></div>';
       out.classList.remove('error');
-
-      let inputText = document.getElementById('computeInput').value.trim();
-      if(!inputText) inputText = "Provide compute optimizer recommendations";
-
-      try {
-        const res = await fetch(urlComputeOpt, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type: 'text', data: inputText })
-        });
-        console.log('Lambda response:', res);
-        const data = await res.json();
-        console.log('Parsed JSON:', data);
-
-        const billing = data.billingData;
-        const recommendation = data.recommendation;
-
-        out.innerHTML = `
-          <h3>📊 Compute Optimizer Dashboard</h3>
-          <p><b>Billing Period:</b> ${billing.billingPeriod.start} to ${billing.billingPeriod.end}</p>
-          <p><b>Total Cost:</b> $${billing.totalCost}</p>
-          <h4>Top Services</h4>
-        `;
-
-        const labels = billing.services.map(s => s.service);
-        const costs = billing.services.map(s => s.cost);
-
+      try{
+        const input=document.getElementById('computeInput').value;
+        const res=await fetch(urlComputeOpt,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:"text",data:input})});
+        const data=await res.json();
+        // Display AI recommendation
+        const billingData=data?.billingData || {};
+        const recommendation=data?.recommendation || "No recommendation available";
+        out.innerHTML=`<h3>Compute Optimizer Recommendations</h3><p><b>Total Cost:</b> $${billingData.totalCost || 0}</p><p>${recommendation}</p>`;
+        // Display top services chart
+        const services=billingData.services || [];
+        if(services.length===0){ if(window.computeChartInstance) window.computeChartInstance.destroy(); return;}
+        const labels=services.map(s=>s.service); const costs=services.map(s=>s.cost);
         if(window.computeChartInstance) window.computeChartInstance.destroy();
-        window.computeChartInstance = new Chart(ctx, {
-          type: 'bar',
-          data: { labels, datasets: [{ label: 'Cost in USD', data: costs, backgroundColor: 'rgba(0,123,255,0.6)', borderColor: 'rgba(0,123,255,1)', borderWidth: 1 }] },
-          options: { responsive: true, plugins: { legend: { display: false }, title: { display: true, text: 'Top AWS Services by Cost' } }, scales: { y: { beginAtZero: true } } }
-        });
-
-        out.innerHTML += `<h4>💡 Recommendations</h4><p>${recommendation}</p>`;
-
-      } catch(err) {
-        console.error('Compute Optimizer error:', err);
-        out.classList.add('error');
-        out.textContent = 'Error fetching Compute Optimizer data: ' + err.message;
-      }
+        window.computeChartInstance=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Cost in USD',data:costs,backgroundColor:'rgba(0,123,255,0.6)',borderColor:'rgba(0,123,255,1)',borderWidth:1}]},options:{responsive:true,plugins:{legend:{display:false},title:{display:true,text:'Top AWS Services by Cost'}},scales:{y:{beginAtZero:true}}}});
+      }catch(err){out.classList.add('error'); out.textContent='Error: '+err.message;}
     };
   </script>
 </body>
