@@ -344,22 +344,51 @@
 
     // Compute Optimizer
     document.getElementById('btnComputeOpt').onclick = async () => {
-      const out=document.getElementById('computeOptOutput');
-      const ctx=document.getElementById('computeChart').getContext('2d');
-      out.innerHTML='<div class="spinner"></div>'; out.classList.remove('error');
-      let inputText=document.getElementById('computeInput').value.trim();
-      if(!inputText) inputText="Provide compute optimizer recommendations";
+      const out = document.getElementById('computeOptOutput');
+      const ctx = document.getElementById('computeChart').getContext('2d');
+      out.innerHTML = '<div class="spinner"></div>'; 
+      out.classList.remove('error');
+
+      let inputText = document.getElementById('computeInput').value.trim();
+      if(!inputText) inputText = "Provide compute optimizer recommendations";
+
       try {
-        const res=await fetch(urlComputeOpt,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'text',data:inputText})});
-        const data=await res.json();
-        const billing=data.billingData, recommendation=data.recommendation;
-        out.innerHTML=`<h3>📊 Compute Optimizer Dashboard</h3><p><b>Billing Period:</b> ${billing.billingPeriod.start} to ${billing.billingPeriod.end}</p><p><b>Total Cost:</b> $${billing.totalCost}</p><h4>Top Services</h4>`;
-        const labels=billing.services.map(s=>s.service);
-        const costs=billing.services.map(s=>s.cost);
+        const res = await fetch(urlComputeOpt, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'text', data: inputText })
+        });
+        console.log('Lambda response:', res);
+        const data = await res.json();
+        console.log('Parsed JSON:', data);
+
+        const billing = data.billingData;
+        const recommendation = data.recommendation;
+
+        out.innerHTML = `
+          <h3>📊 Compute Optimizer Dashboard</h3>
+          <p><b>Billing Period:</b> ${billing.billingPeriod.start} to ${billing.billingPeriod.end}</p>
+          <p><b>Total Cost:</b> $${billing.totalCost}</p>
+          <h4>Top Services</h4>
+        `;
+
+        const labels = billing.services.map(s => s.service);
+        const costs = billing.services.map(s => s.cost);
+
         if(window.computeChartInstance) window.computeChartInstance.destroy();
-        window.computeChartInstance=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Cost in USD',data:costs,backgroundColor:'rgba(0,123,255,0.6)',borderColor:'rgba(0,123,255,1)',borderWidth:1}]},options:{responsive:true,plugins:{legend:{display:false},title:{display:true,text:'Top AWS Services by Cost'}},scales:{y:{beginAtZero:true}}}});
-        out.innerHTML+=`<h4>💡 Recommendations</h4><p>${recommendation}</p>`;
-      } catch(err){out.classList.add('error'); out.textContent='Error fetching Compute Optimizer data: '+err.message;}
+        window.computeChartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: { labels, datasets: [{ label: 'Cost in USD', data: costs, backgroundColor: 'rgba(0,123,255,0.6)', borderColor: 'rgba(0,123,255,1)', borderWidth: 1 }] },
+          options: { responsive: true, plugins: { legend: { display: false }, title: { display: true, text: 'Top AWS Services by Cost' } }, scales: { y: { beginAtZero: true } } }
+        });
+
+        out.innerHTML += `<h4>💡 Recommendations</h4><p>${recommendation}</p>`;
+
+      } catch(err) {
+        console.error('Compute Optimizer error:', err);
+        out.classList.add('error');
+        out.textContent = 'Error fetching Compute Optimizer data: ' + err.message;
+      }
     };
   </script>
 </body>
