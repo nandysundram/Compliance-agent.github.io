@@ -190,7 +190,56 @@
 
   <h1>BCT Terraform Tools UI</h1>
 
-  <!-- All other sections remain unchanged (Generate, Compliance, Image to Terraform, FinOps, Well-Architected) -->
+  <div class="section drop-zone" id="genSection">
+    <h2>🛠️ Generate Terraform</h2>
+    <label for="genInput">Description Input:</label>
+    <textarea id="genInput" placeholder="Enter your project description..." class="form-control"></textarea>
+    <button id="btnGen" class="imageFileBtn">Run Generate</button>
+    <div id="genOutput" class="output"></div>
+    <img id="genPreview" class="preview" alt="Uploaded preview"/>
+  </div>
+
+  <div class="section drop-zone" id="checkSection">
+    <h2>🔍 Check Compliance</h2>
+    <label for="checkInput">Terraform HCL Input:</label>
+    <textarea id="checkInput" placeholder="Paste your Terraform HCL here..." class="form-control"></textarea>
+    <button id="btnCheck" class="imageFileBtn">Run Compliance</button>
+    <div id="checkOutput" class="output"></div>
+    <img id="checkPreview" class="preview" alt="Uploaded preview"/>
+  </div>
+
+  <div class="section drop-zone" id="imageSection">
+    <h2>🖼️ Image to Terraform Generator</h2>
+    <label for="checkImagein">Optional Text Context:</label>
+    <textarea id="checkImagein" placeholder="Enter any text context here..." class="form-control"></textarea>
+    <label>Upload Architecture Image:</label>
+    <div class="file-input-wrapper">
+      <span class="file-btn" id="imageFileBtn">Choose Image</span>
+      <input type="file" accept="image/*" id="imageInputOnly" />
+    </div>
+    <button id="imageCheck" class="btn">Generate Code</button>
+    <div id="checkImageOut" class="output"></div>
+    <img id="imagePreview" class="preview" alt="Uploaded preview"/>
+  </div>
+
+  <div class="section" id="extraSection">
+    <h2>⚙️ FinOps Tools</h2>
+    <label for="finopsInput">Description Input:</label>
+    <textarea id="finopsInput" placeholder="Enter description for FinOps suggestion..." class="form-control"></textarea>
+    <button id="btnFinops" class="imageFileBtn">FinOps Suggestion</button>
+    <div id="finopsOutput" class="output"></div>
+    <canvas id="finopsChart"></canvas>
+  </div>
+
+  <div class="section" id="wellarchSection">
+    <h2>⚙️ Well-Architected Tools</h2>
+    <label for="wellarchInput">Description Input:</label>
+    <textarea id="wellarchInput" placeholder="Enter description for Well-Architected check..." class="form-control"></textarea>
+    <p><b>Well-Architected Dashboard URL:</b> 
+      <a href="http://wa-iac-front-tbey7grnmmkt-849969930.us-east-1.elb.amazonaws.com/" target="_blank" class="imageFileBtn">🏗️ Open Well-Architected Dashboard</a>
+    </p>
+    <div id="wellArchOutput" class="output"></div>
+  </div>
 
   <div class="section" id="finopsComputeSection">
     <h2>🏗️ Compute Optimizer</h2>
@@ -218,15 +267,6 @@
     const urlWellArch = "https://<your-wellarch-lambda-url>";
     const urlComputeOpt = "https://oluu5uhcgo4wiweqvudufymwki0jrdag.lambda-url.ap-southeast-1.on.aws/";
 
-    function renderPreview(file, imgEl) {
-      const reader = new FileReader();
-      reader.onload = e => {
-        imgEl.src = e.target.result;
-        imgEl.style.display = 'block';
-      };
-      reader.readAsDataURL(file);
-    }
-
     async function callLambda(url, payload, outEl) {
       const out = document.getElementById(outEl);
       out.innerHTML = '<div class="spinner"></div>';
@@ -240,55 +280,41 @@
         });
         const text = await res.text();
         let parsed = text;
-        try {
-          const obj = JSON.parse(text);
-          if (obj && obj.statusCode && obj.body) parsed = obj.body;
-        } catch (_) {}
+        try { const obj = JSON.parse(text); if(obj?.statusCode && obj?.body) parsed = obj.body; } catch (_) {}
         out.textContent = parsed;
       } catch (err) {
         out.classList.add('error');
         out.textContent = 'Error: ' + err.message;
-      } finally {
-        out.classList.remove('loading');
-      }
+      } finally { out.classList.remove('loading'); }
     }
 
     document.getElementById('btnGen').onclick = () => {
-      const payload = { type: "text", data: document.getElementById('genInput').value };
-      callLambda(urlGen, payload, 'genOutput');
+      callLambda(urlGen, { type: "text", data: document.getElementById('genInput').value }, 'genOutput');
     };
-
     document.getElementById('btnCheck').onclick = () => {
-      const tfCode = document.getElementById('checkInput').value;
-      const payload = { input: tfCode };
-      callLambda(urlCheck, payload, 'checkOutput');
+      callLambda(urlCheck, { input: document.getElementById('checkInput').value }, 'checkOutput');
     };
-
-    document.getElementById('imageFileBtn').addEventListener('click', () => {
-      document.getElementById('imageInputOnly').click();
-    });
-
-    document.getElementById('imageInputOnly').addEventListener('change', e => {
+    document.getElementById('imageFileBtn').onclick = () => document.getElementById('imageInputOnly').click();
+    document.getElementById('imageInputOnly').onchange = e => {
       const file = e.target.files[0];
-      if (file) renderPreview(file, document.getElementById('imagePreview'));
-    });
-
+      if(file) {
+        const reader = new FileReader();
+        reader.onload = ev => { const img = document.getElementById('imagePreview'); img.src = ev.target.result; img.style.display='block'; };
+        reader.readAsDataURL(file);
+      }
+    };
     document.getElementById('imageCheck').onclick = () => {
-      const rawText = document.getElementById('checkImagein').value;
       const fileInput = document.getElementById('imageInputOnly');
       const outEl = 'checkImageOut';
-      if (!fileInput.files.length) {
-        document.getElementById(outEl).textContent = '❌ Please select an image file!';
-        return;
-      }
+      if(!fileInput.files.length){document.getElementById(outEl).textContent='❌ Please select an image file!'; return;}
       const file = fileInput.files[0];
       const reader = new FileReader();
-      reader.onload = e => {
+      reader.onload = e=>{
         const base64 = e.target.result.split(',')[1];
         let data = base64;
-        if (rawText.trim()) data += "\nContext: " + rawText;
-        const payload = { type: "image", data };
-        callLambda(urlImage, payload, outEl);
+        const ctxText = document.getElementById('checkImagein').value.trim();
+        if(ctxText) data += "\nContext: " + ctxText;
+        callLambda(urlImage,{type:"image",data},outEl);
       };
       reader.readAsDataURL(file);
     };
@@ -303,81 +329,37 @@
         const data = await res.json();
         const month = data?.month || "N/A";
         const totalCost = data?.totalCost || 0;
-        const services = Array.isArray(data?.services) ? data.services : [];
-        out.innerHTML = `
-          <h3>📊 FinOps Dashboard - ${month}</h3>
-          <p><b>Total Cost:</b> $${totalCost}</p>
-          <h4>Top ${services.length} Services</h4>
-        `;
-        if (services.length === 0) {
-          out.innerHTML += `<p>⚠️ No service cost data available</p>`;
-          if (window.finopsChartInstance) window.finopsChartInstance.destroy();
-          return;
-        }
-        const labels = services.map(s => s.service || "Unknown");
-        const costs = services.map(s => s.cost || 0);
-        if (window.finopsChartInstance) window.finopsChartInstance.destroy();
-        window.finopsChartInstance = new Chart(ctx, {
-          type: 'bar',
-          data: { labels, datasets: [{ label: 'Cost in USD', data: costs, backgroundColor: 'rgba(0, 123, 255, 0.6)', borderColor: 'rgba(0, 123, 255, 1)', borderWidth: 1 }] },
-          options: { responsive: true, plugins: { legend: { display: false }, title: { display: true, text: 'Top AWS Services by Cost' } }, scales: { y: { beginAtZero: true } } }
-        });
-      } catch (err) {
-        out.classList.add('error');
-        out.textContent = 'Error fetching FinOps data: ' + err.message;
-      }
+        const services = Array.isArray(data?.services)?data.services:[];
+        out.innerHTML=`<h3>📊 FinOps Dashboard - ${month}</h3><p><b>Total Cost:</b> $${totalCost}</p><h4>Top ${services.length} Services</h4>`;
+        if(services.length===0){out.innerHTML+='<p>⚠️ No service cost data available</p>'; if(window.finopsChartInstance) window.finopsChartInstance.destroy(); return;}
+        const labels=services.map(s=>s.service||"Unknown"); const costs=services.map(s=>s.cost||0);
+        if(window.finopsChartInstance) window.finopsChartInstance.destroy();
+        window.finopsChartInstance=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Cost in USD',data:costs,backgroundColor:'rgba(0,123,255,0.6)',borderColor:'rgba(0,123,255,1)',borderWidth:1}]},options:{responsive:true,plugins:{legend:{display:false},title:{display:true,text:'Top AWS Services by Cost'}},scales:{y:{beginAtZero:true}}}});
+      } catch(err){out.classList.add('error'); out.textContent='Error fetching FinOps data: '+err.message;}
     };
 
     document.getElementById('btnWellArch').onclick = () => {
-      const payload = { type: "text", data: document.getElementById('wellarchInput').value };
-      callLambda(urlWellArch, payload, 'wellArchOutput');
+      callLambda(urlWellArch,{type:"text",data:document.getElementById('wellarchInput').value},'wellArchOutput');
     };
 
-    // ✅ Updated Compute Optimizer logic
+    // Compute Optimizer
     document.getElementById('btnComputeOpt').onclick = async () => {
-      const out = document.getElementById('computeOptOutput');
-      const ctx = document.getElementById('computeChart').getContext('2d');
-      out.innerHTML = '<div class="spinner"></div>';
-      out.classList.remove('error');
-
-      let inputText = document.getElementById('computeInput').value.trim();
-      if (!inputText) inputText = "Provide compute optimizer recommendations";
-
-      const payload = { type: "text", data: inputText };
-
+      const out=document.getElementById('computeOptOutput');
+      const ctx=document.getElementById('computeChart').getContext('2d');
+      out.innerHTML='<div class="spinner"></div>'; out.classList.remove('error');
+      let inputText=document.getElementById('computeInput').value.trim();
+      if(!inputText) inputText="Provide compute optimizer recommendations";
       try {
-        const res = await fetch(urlComputeOpt, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        const billing = data.billingData;
-        const recommendation = data.recommendation;
-
-        out.innerHTML = `
-          <h3>📊 Compute Optimizer Dashboard</h3>
-          <p><b>Billing Period:</b> ${billing.billingPeriod.start} to ${billing.billingPeriod.end}</p>
-          <p><b>Total Cost:</b> $${billing.totalCost}</p>
-          <h4>Top Services</h4>
-        `;
-
-        const labels = billing.services.map(s => s.service);
-        const costs = billing.services.map(s => s.cost);
-
-        if (window.computeChartInstance) window.computeChartInstance.destroy();
-        window.computeChartInstance = new Chart(ctx, {
-          type: 'bar',
-          data: { labels, datasets: [{ label: 'Cost in USD', data: costs, backgroundColor: 'rgba(0, 123, 255, 0.6)', borderColor: 'rgba(0, 123, 255, 1)', borderWidth: 1 }] },
-          options: { responsive: true, plugins: { legend: { display: false }, title: { display: true, text: 'Top AWS Services by Cost' } }, scales: { y: { beginAtZero: true } } }
-        });
-
-        out.innerHTML += `<h4>💡 Recommendations</h4><p>${recommendation}</p>`;
-
-      } catch (err) {
-        out.classList.add('error');
-        out.textContent = 'Error fetching Compute Optimizer data: ' + err.message;
-      }
+        const res=await fetch(urlComputeOpt,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'text',data:inputText})});
+        const data=await res.json();
+        const billing=data.billingData, recommendation=data.recommendation;
+        out.innerHTML=`<h3>📊 Compute Optimizer Dashboard</h3><p><b>Billing Period:</b> ${billing.billingPeriod.start} to ${billing.billingPeriod.end}</p><p><b>Total Cost:</b> $${billing.totalCost}</p><h4>Top Services</h4>`;
+        const labels=billing.services.map(s=>s.service);
+        const costs=billing.services.map(s=>s.cost);
+        if(window.computeChartInstance) window.computeChartInstance.destroy();
+        window.computeChartInstance=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Cost in USD',data:costs,backgroundColor:'rgba(0,123,255,0.6)',borderColor:'rgba(0,123,255,1)',borderWidth:1}]},options:{responsive:true,plugins:{legend:{display:false},title:{display:true,text:'Top AWS Services by Cost'}},scales:{y:{beginAtZero:true}}}});
+        out.innerHTML+=`<h4>💡 Recommendations</h4><p>${recommendation}</p>`;
+      } catch(err){out.classList.add('error'); out.textContent='Error fetching Compute Optimizer data: '+err.message;}
     };
   </script>
 </body>
