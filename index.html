@@ -18,10 +18,20 @@
     }
     h1 {
       text-align: center;
-      color: #fff;
-      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
-      font-size: 2.5rem;
-      animation: fadeInDown 1s ease-in-out;
+      font-family: 'Poppins', sans-serif;
+      font-size: 2.8rem;
+      font-weight: 700;
+      background: linear-gradient(45deg, #007bff, #00d4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      animation: fadeInDown 1s ease-in-out, glow 2s ease-in-out infinite;
+      margin-bottom: 30px;
+    }
+    @keyframes glow {
+      0% { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+      50% { text-shadow: 2px 2px 8px rgba(0, 123, 255, 0.5); }
+      100% { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
     }
     .section {
       background: rgba(255, 255, 255, 0.95);
@@ -181,15 +191,13 @@
           <li class="nav-item"><a class="nav-link" href="#checkSection">Compliance</a></li>
           <li class="nav-item"><a class="nav-link" href="#imageSection">Image to Terraform</a></li>
           <li class="nav-item"><a class="nav-link" href="#extraSection">FinOps</a></li>
-          <li class="nav-item"><a class="nav-link" href="#wellarchSection">Well-Architected</a></li>
+          <li class="nav-item"><a class="nav-link" href="#wellarchSection">IaC Analyzer</a></li>
           <li class="nav-item"><a class="nav-link" href="#finopsComputeSection">Compute Optimizer</a></li>
         </ul>
       </div>
     </div>
   </nav>
-
   <h1>BCT Terraform Tools UI</h1>
-
   <!-- Generate Section -->
   <div class="section drop-zone" id="genSection">
     <h2>🛠️ Generate Terraform</h2>
@@ -199,7 +207,6 @@
     <div id="genOutput" class="output"></div>
     <img id="genPreview" class="preview" alt="Uploaded preview"/>
   </div>
-
   <!-- Compliance Section -->
   <div class="section drop-zone" id="checkSection">
     <h2>🔍 Check Compliance</h2>
@@ -209,7 +216,6 @@
     <div id="checkOutput" class="output"></div>
     <img id="checkPreview" class="preview" alt="Uploaded preview"/>
   </div>
-
   <!-- Image to Terraform Section -->
   <div class="section drop-zone" id="imageSection">
     <h2>🖼️ Image to Terraform Generator</h2>
@@ -224,7 +230,6 @@
     <div id="checkImageOut" class="output"></div>
     <img id="imagePreview" class="preview" alt="Uploaded preview"/>
   </div>
-
   <!-- FinOps Section -->
   <div class="section" id="extraSection">
     <h2>⚙️ FinOps Tools</h2>
@@ -234,18 +239,14 @@
     <div id="finopsOutput" class="output"></div>
     <canvas id="finopsChart"></canvas>
   </div>
-
-  <!-- Well-Architected Section -->
+  <!-- IaC Analyzer - AWS Well-Architected Section -->
   <div class="section" id="wellarchSection">
-    <h2>⚙️ Well-Architected Tools</h2>
-    <label for="wellarchInput">Description Input:</label>
-    <textarea id="wellarchInput" placeholder="Enter description for Well-Architected check..." class="form-control"></textarea>
-    <p><b>Well-Architected Dashboard URL:</b> 
-      <a href="http://wa-iac-front-tbey7grnmmkt-849969930.us-east-1.elb.amazonaws.com/" target="_blank" class="imageFileBtn">🏗️ Open Well-Architected Dashboard</a>
+    <h2>⚙️ IaC Analyzer - AWS Well-Architected</h2>
+    <p><b>Well-Architected Dashboard URL:</b>
+      <a href="http://wa-iac-front-tbey7grnmmkt-849969930.us-east-1.elb.amazonaws.com/" target="_blank" class="imageFileBtn">🏗️ IaC Analyzer - AWS Well-Architected </a>
     </p>
     <div id="wellArchOutput" class="output"></div>
   </div>
-
   <!-- Compute Optimizer Section -->
   <div class="section" id="finopsComputeSection">
     <h2>🏗️ Compute Optimizer</h2>
@@ -255,24 +256,50 @@
     <div id="computeOptOutput" class="output"></div>
     <canvas id="computeChart"></canvas>
   </div>
-
   <footer style="background-color: #007bff; color: #fff; padding: 20px 0; text-align: center;">
     <div class="container">
       <p>&copy; 2025 BCT Terraform Tools. All rights reserved.</p>
     </div>
   </footer>
-
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
-
   <script>
-    // Replace these URLs with your deployed Lambda function URLs
+    // Replace with your actual Lambda URLs
     const urlGen = "https://2jpdo3bst2rvpzymhebdgvgnma0msplp.lambda-url.ap-southeast-1.on.aws/";
     const urlCheck = "https://kfjskb3ttrvcclvb7rw4t3d2na0aebcl.lambda-url.ap-southeast-1.on.aws/";
     const urlImage = "https://horyvmwuwwf4zfunvy7a3kggiu0mmvvn.lambda-url.ap-southeast-1.on.aws/";
     const urlFinops = "https://2aggu3zily2qmrhxe7msg3crzq0dvvfc.lambda-url.ap-southeast-1.on.aws/";
-    const urlWellArch = "https://<your-wellarch-lambda-url>";
+    const urlWellArch = "https://<your-wellarch-lambda-url>"; // Replace with actual URL
     const urlComputeOpt = "https://oluu5uhcgo4wiweqvudufymwki0jrdag.lambda-url.ap-southeast-1.on.aws/";
+
+    // Drag-and-drop functionality
+    const dropZones = document.querySelectorAll('.drop-zone');
+    dropZones.forEach(zone => {
+      zone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        zone.classList.add('dragover');
+      });
+      zone.addEventListener('dragleave', () => {
+        zone.classList.remove('dragover');
+      });
+      zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        zone.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const img = zone.querySelector('.preview');
+            img.src = ev.target.result;
+            img.style.display = 'block';
+          };
+          reader.readAsDataURL(file);
+          if (zone.id === 'imageSection') {
+            document.getElementById('imageInputOnly').files = e.dataTransfer.files;
+          }
+        }
+      });
+    });
 
     async function callLambda(url, payload, outEl) {
       const out = document.getElementById(outEl);
@@ -285,43 +312,72 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
         const text = await res.text();
-        let parsed = text;
-        try { const obj = JSON.parse(text); if(obj?.statusCode && obj?.body) parsed = obj.body; } catch (_) {}
-        out.textContent = parsed;
+        let parsed;
+        try {
+          const obj = JSON.parse(text);
+          parsed = obj?.body || text;
+        } catch {
+          parsed = text;
+        }
+        out.textContent = parsed || 'No response data';
       } catch (err) {
         out.classList.add('error');
-        out.textContent = 'Error: ' + err.message;
-      } finally { out.classList.remove('loading'); }
+        out.textContent = `Error: ${err.message}`;
+      } finally {
+        out.classList.remove('loading');
+      }
     }
 
     document.getElementById('btnGen').onclick = () => {
-      callLambda(urlGen, { type: "text", data: document.getElementById('genInput').value }, 'genOutput');
+      const input = document.getElementById('genInput').value.trim();
+      if (!input) {
+        document.getElementById('genOutput').textContent = '❌ Please enter a project description!';
+        return;
+      }
+      callLambda(urlGen, { type: "text", data: input }, 'genOutput');
     };
+
     document.getElementById('btnCheck').onclick = () => {
-      callLambda(urlCheck, { input: document.getElementById('checkInput').value }, 'checkOutput');
+      const input = document.getElementById('checkInput').value.trim();
+      if (!input) {
+        document.getElementById('checkOutput').textContent = '❌ Please enter Terraform HCL code!';
+        return;
+      }
+      callLambda(urlCheck, { input }, 'checkOutput');
     };
+
     document.getElementById('imageFileBtn').onclick = () => document.getElementById('imageInputOnly').click();
+
     document.getElementById('imageInputOnly').onchange = e => {
       const file = e.target.files[0];
-      if(file) {
+      if (file) {
         const reader = new FileReader();
-        reader.onload = ev => { const img = document.getElementById('imagePreview'); img.src = ev.target.result; img.style.display='block'; };
+        reader.onload = ev => {
+          const img = document.getElementById('imagePreview');
+          img.src = ev.target.result;
+          img.style.display = 'block';
+        };
         reader.readAsDataURL(file);
       }
     };
+
     document.getElementById('imageCheck').onclick = () => {
       const fileInput = document.getElementById('imageInputOnly');
       const outEl = 'checkImageOut';
-      if(!fileInput.files.length){document.getElementById(outEl).textContent='❌ Please select an image file!'; return;}
+      if (!fileInput.files.length) {
+        document.getElementById(outEl).textContent = '❌ Please select an image file!';
+        return;
+      }
       const file = fileInput.files[0];
       const reader = new FileReader();
-      reader.onload = e=>{
+      reader.onload = e => {
         const base64 = e.target.result.split(',')[1];
         let data = base64;
         const ctxText = document.getElementById('checkImagein').value.trim();
-        if(ctxText) data += "\nContext: " + ctxText;
-        callLambda(urlImage,{type:"image",data},outEl);
+        if (ctxText) data += "\nContext: " + ctxText;
+        callLambda(urlImage, { type: "image", data }, outEl);
       };
       reader.readAsDataURL(file);
     };
@@ -332,44 +388,124 @@
       out.innerHTML = '<div class="spinner"></div>';
       out.classList.remove('error');
       try {
-        const res = await fetch(urlFinops);
+        const input = document.getElementById('finopsInput').value.trim();
+        const res = await fetch(urlFinops, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: "text", data: input })
+        });
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
         const data = await res.json();
         const month = data?.month || "N/A";
         const totalCost = data?.totalCost || 0;
-        const services = Array.isArray(data?.services)?data.services:[];
-        out.innerHTML=`<h3>📊 FinOps Dashboard - ${month}</h3><p><b>Total Cost:</b> $${totalCost}</p><h4>Top ${services.length} Services</h4>`;
-        if(services.length===0){out.innerHTML+='<p>⚠️ No service cost data available</p>'; if(window.finopsChartInstance) window.finopsChartInstance.destroy(); return;}
-        const labels=services.map(s=>s.service||"Unknown"); const costs=services.map(s=>s.cost||0);
-        if(window.finopsChartInstance) window.finopsChartInstance.destroy();
-        window.finopsChartInstance=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Cost in USD',data:costs,backgroundColor:'rgba(0,123,255,0.6)',borderColor:'rgba(0,123,255,1)',borderWidth:1}]},options:{responsive:true,plugins:{legend:{display:false},title:{display:true,text:'Top AWS Services by Cost'}},scales:{y:{beginAtZero:true}}}});
-      } catch(err){out.classList.add('error'); out.textContent='Error fetching FinOps data: '+err.message;}
+        const services = Array.isArray(data?.services) ? data.services : [];
+        out.innerHTML = `<h3>📊 FinOps Dashboard - ${month}</h3><p><b>Total Cost:</b> $${totalCost}</p><h4>Top ${services.length} Services</h4>`;
+        if (services.length === 0) {
+          out.innerHTML += '<p>⚠️ No service cost data available</p>';
+          if (window.finopsChartInstance) {
+            window.finopsChartInstance.destroy();
+            window.finopsChartInstance = null;
+          }
+          return;
+        }
+        const labels = services.map(s => s.service || "Unknown");
+        const costs = services.map(s => s.cost || 0);
+        if (window.finopsChartInstance) {
+          window.finopsChartInstance.destroy();
+          window.finopsChartInstance = null;
+        }
+        window.finopsChartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [{
+              label: 'Cost in USD',
+              data: costs,
+              backgroundColor: 'rgba(0,123,255,0.6)',
+              borderColor: 'rgba(0,123,255,1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false },
+              title: { display: true, text: 'Top AWS Services by Cost' }
+            },
+            scales: { y: { beginAtZero: true } }
+          }
+        });
+      } catch (err) {
+        out.classList.add('error');
+        out.textContent = 'Error fetching FinOps data: ' + err.message;
+      }
     };
 
     document.getElementById('btnWellArch').onclick = () => {
-      callLambda(urlWellArch,{type:"text",data:document.getElementById('wellarchInput').value},'wellArchOutput');
+      if (urlWellArch.includes('<your-wellarch-lambda-url>')) {
+        document.getElementById('wellArchOutput').classList.add('error');
+        document.getElementById('wellArchOutput').textContent = 'Error: Well-Architected Lambda URL is not configured!';
+        return;
+      }
+      callLambda(urlWellArch, { type: "text", data: "" }, 'wellArchOutput');
     };
 
-    // Compute Optimizer Section
     document.getElementById('btnComputeOpt').onclick = async () => {
-      const out=document.getElementById('computeOptOutput');
-      const ctx=document.getElementById('computeChart').getContext('2d');
-      out.innerHTML='<div class="spinner"></div>';
+      const out = document.getElementById('computeOptOutput');
+      const ctx = document.getElementById('computeChart').getContext('2d');
+      out.innerHTML = '<div class="spinner"></div>';
       out.classList.remove('error');
-      try{
-        const input=document.getElementById('computeInput').value;
-        const res=await fetch(urlComputeOpt,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:"text",data:input})});
-        const data=await res.json();
-        // Display AI recommendation
-        const billingData=data?.billingData || {};
-        const recommendation=data?.recommendation || "No recommendation available";
-        out.innerHTML=`<h3>Compute Optimizer Recommendations</h3><p><b>Total Cost:</b> $${billingData.totalCost || 0}</p><p>${recommendation}</p>`;
-        // Display top services chart
-        const services=billingData.services || [];
-        if(services.length===0){ if(window.computeChartInstance) window.computeChartInstance.destroy(); return;}
-        const labels=services.map(s=>s.service); const costs=services.map(s=>s.cost);
-        if(window.computeChartInstance) window.computeChartInstance.destroy();
-        window.computeChartInstance=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Cost in USD',data:costs,backgroundColor:'rgba(0,123,255,0.6)',borderColor:'rgba(0,123,255,1)',borderWidth:1}]},options:{responsive:true,plugins:{legend:{display:false},title:{display:true,text:'Top AWS Services by Cost'}},scales:{y:{beginAtZero:true}}}});
-      }catch(err){out.classList.add('error'); out.textContent='Error: '+err.message;}
+      try {
+        const input = document.getElementById('computeInput').value.trim();
+        const res = await fetch(urlComputeOpt, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: "text", data: input })
+        });
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        const data = await res.json();
+        const billingData = data?.billingData || {};
+        const recommendation = data?.recommendation || "No recommendation available";
+        out.innerHTML = `<h3>Compute Optimizer Recommendations</h3><p><b>Total Cost:</b> $${billingData.totalCost || 0}</p><p>${recommendation}</p>`;
+        const services = billingData.services || [];
+        if (services.length === 0) {
+          if (window.computeChartInstance) {
+            window.computeChartInstance.destroy();
+            window.computeChartInstance = null;
+          }
+          return;
+        }
+        const labels = services.map(s => s.service || "Unknown");
+        const costs = services.map(s => s.cost || 0);
+        if (window.computeChartInstance) {
+          window.computeChartInstance.destroy();
+          window.computeChartInstance = null;
+        }
+        window.computeChartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [{
+              label: 'Cost in USD',
+              data: costs,
+              backgroundColor: 'rgba(0,123,255,0.6)',
+              borderColor: 'rgba(0,123,255,1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false },
+              title: { display: true, text: 'Top AWS Services by Cost' }
+            },
+            scales: { y: { beginAtZero: true } }
+          }
+        });
+      } catch (err) {
+        out.classList.add('error');
+        out.textContent = 'Error: ' + err.message;
+      }
     };
   </script>
 </body>
